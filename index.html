@@ -2,353 +2,657 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>生菜標籤管理系統 v12.8</title>
+    <title>生菜標籤管理系統 v13.9 - 品規格式優化版</title>
     <style>
         :root {
-            --primary-color: #007bff;
-            --success-color: #28a745;
-            --danger-color: #dc3545;
-            --bg-color: #f0f2f5;
-            --card-bg: #ffffff;
-            --text-main: #333;
+            --primary-dark: #1a2a3a;
+            --primary-accent: #007bff;
+            --success-green: #2ecc71;
+            --danger-red: #e74c3c;
+            --neutral-accent: #34495e; 
+            --bg-soft: #f8f9fa;
+            --border-color: #e0e6ed;
+            --text-main: #2c3e50;
         }
 
         body { 
-            background: var(--bg-color); 
-            font-family: "Segoe UI", "Microsoft JhengHei", sans-serif; 
+            background: var(--bg-soft); 
+            font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; 
             margin: 0; 
-            padding: 0;
+            padding: 20px; 
             color: var(--text-main);
         }
-
-        /* --- 控制面板 --- */
-        .header {
-            background: #1a2a3a;
-            color: white;
-            padding: 20px 40px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        
+        .header { 
+            background: linear-gradient(135deg, var(--primary-dark) 0%, #2c3e50 100%); 
+            color: white; 
+            padding: 15px 30px; 
+            border-radius: 12px; 
+            margin-bottom: 20px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
         }
-
-        .header h2 { margin: 0; font-size: 24px; letter-spacing: 1px; }
-
-        .controls { 
-            padding: 25px 40px; 
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .card {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }
-
-        .setting-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 30px;
-            align-items: center;
-        }
-
-        .batch-action {
-            background: #e7f1ff;
-            border: 1px solid #b3d7ff;
-            padding: 15px 25px;
-            border-radius: 10px;
+        .header h2 { 
+            margin: 0; 
+            font-size: 22px; 
+            font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
         }
 
-        /* --- 表格樣式 --- */
-        .table-container { overflow-x: auto; }
-        table { 
-            border-collapse: collapse; 
-            width: 100%; 
-            max-width: 1200px; 
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
+        .card { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
+            margin-bottom: 20px; 
+            border: 1px solid var(--border-color);
         }
         
-        th { 
-            background: #f8f9fa; 
-            color: #555;
+        .setup-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px; 
+            align-items: flex-end; 
+        }
+
+        .setup-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .setup-item label {
             font-weight: 600;
-            padding: 12px;
-            border-bottom: 2px solid #eee;
-            font-size: 15px;
+            font-size: 14px;
+            color: #5d6d7e;
         }
-
-        td { 
-            border-bottom: 1px solid #f0f0f0; 
-            padding: 10px; 
-            text-align: center; 
-        }
-
-        tr:hover { background-color: #fcfcfc; }
-
-        .product-name { text-align: left; font-weight: bold; width: 160px; color: #2c3e50; padding-left: 20px; }
-
-        /* --- 表單元件 --- */
-        input[type="number"], input[type="date"], select { 
-            padding: 8px 12px; 
-            font-size: 14px; 
-            border: 1px solid #ddd; 
-            border-radius: 6px;
-            transition: border 0.3s;
+        
+        .setup-grid select, .setup-grid input[type="date"] {
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
             outline: none;
+            font-size: 15px;
+            background-color: white;
         }
 
-        input:focus, select:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(0,123,255,0.1); }
-        input[type="number"] { width: 80px; text-align: center; font-weight: bold; color: var(--primary-color); }
+        table { 
+            border-collapse: separate; 
+            border-spacing: 0;
+            width: 100%; 
+            margin-top: 10px; 
+            background: white; 
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        th { 
+            background: #f1f4f8; 
+            padding: 15px 12px; 
+            border-bottom: 2px solid var(--border-color);
+            color: #5d6d7e; 
+            font-size: 14px; 
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        td { 
+            padding: 12px; 
+            border-bottom: 1px solid var(--border-color);
+            text-align: center; 
+            transition: all 0.3s ease; 
+        }
+        
+        .product-name { 
+            text-align: left; 
+            font-weight: 600; 
+            padding-left: 20px; 
+            color: var(--text-main);
+            background: #fafbfc;
+        }
+        
+        .custom-row { background-color: #f1f4f8 !important; } 
+        .row-updated { background-color: #e8f8f5 !important; animation: highlightFade 2s ease; }
+        
+        @keyframes highlightFade {
+            from { background-color: #d1f2eb; }
+            to { background-color: #e8f8f5; }
+        }
 
-        /* --- 按鈕 --- */
-        .btn-group { display: flex; gap: 12px; margin-top: 10px; }
+        input[type="number"] { 
+            width: 65px; 
+            padding: 8px; 
+            border: 1px solid var(--border-color);
+            border-radius: 6px; 
+            text-align: center; 
+            font-weight: 600; 
+            color: var(--primary-accent); 
+            transition: border-color 0.2s;
+        }
+        input[type="number"]:focus { border-color: var(--primary-accent); outline: none; }
+        
+        input[type="text"] { 
+            padding: 8px; 
+            border: 1px solid var(--border-color);
+            border-radius: 6px; 
+            outline: none; 
+            transition: border-color 0.2s;
+        }
+        input[type="text"]:focus { border-color: var(--neutral-accent); }
+
+        .spec-input-text { width: 100px; font-size: 13px; border-style: dashed !important; }
+        .input-blank-name { width: 130px; font-weight: bold; border-color: var(--neutral-accent) !important; }
+
+        .action-bar {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 25px;
+            padding: 20px;
+            background: #f1f4f8;
+            border-radius: 12px;
+        }
+
         button { 
-            padding: 12px 24px; 
-            font-size: 15px; 
+            padding: 10px 24px; 
             cursor: pointer; 
             border: none; 
             border-radius: 8px; 
             font-weight: 600; 
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            transition: all 0.2s ease; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            gap: 10px; 
+            font-size: 15px;
         }
-
         button:active { transform: translateY(1px); }
 
-        .btn-preview { background: var(--primary-color); color: white; }
-        .btn-preview:hover { background: #0069d9; box-shadow: 0 4px 12px rgba(0,123,255,0.3); }
-
-        .btn-print { background: var(--success-color); color: white; }
-        .btn-print:hover { background: #218838; box-shadow: 0 4px 12px rgba(40,167,69,0.3); }
-
-        .btn-clear { background: #fff; color: var(--danger-color); border: 1px solid var(--danger-color); }
-        .btn-clear:hover { background: #fff5f5; }
-
-        .btn-apply { background: #495057; color: white; padding: 8px 16px; font-size: 14px; }
-        .btn-apply:hover { background: #343a40; }
-
-        /* --- 標籤預覽區 --- */
-        #printArea { padding: 30px 40px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-start; }
-
-        .label-page {
-            background: white;
-            display: inline-block;
-            box-sizing: border-box;
-            position: relative; 
-            overflow: hidden;
-            color: black;
-            border: 1px solid #eee; 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            vertical-align: top;
-            font-family: "Microsoft JhengHei", sans-serif;
+        .btn-preview { background: var(--primary-accent); color: white; box-shadow: 0 4px 10px rgba(0,123,255,0.2); }
+        .btn-preview:hover { background: #0069d9; }
+        
+        .btn-print { background: var(--success-green); color: white; box-shadow: 0 4px 10px rgba(46,204,113,0.2); }
+        .btn-print:hover { background: #27ae60; }
+        
+        .btn-paste { 
+            background: var(--neutral-accent); 
+            color: white; 
+            box-shadow: 0 4px 10px rgba(52,73,94,0.2);
+            height: 42px;
         }
+        .btn-paste:hover { background: #2c3e50; }
+        
+        .btn-clear { background: #95a5a6; color: white; height: 42px; }
+        .btn-clear:hover { background: #7f8c8d; }
 
-        .box-size { width: 84.9mm; height: 62.4mm; }
-        .spec-size { width: 35mm; height: 25mm; }
+        #printArea { padding: 20px; display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; }
+        .label-page { 
+            background: white; 
+            display: inline-block; 
+            box-sizing: border-box; 
+            position: relative; 
+            overflow: hidden; 
+            color: black; 
+            border: 1px solid #eee; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .box-size { width: 84.9mm; height: 62.4mm; max-width: 84.9mm; max-height: 62.4mm; }
+        .spec-size { width: 35mm; height: 25mm; max-width: 35mm; max-height: 25mm; }
 
         @media print {
             .no-print { display: none !important; }
-            body { background: white; }
+            body { padding: 0; background: white; }
             #printArea { padding: 0; display: block; }
-            .label-page { border: none; margin: 0; box-shadow: none; page-break-after: always; display: block; }
+            .label-page { border: none; margin: 0; page-break-after: always; display: block; box-shadow: none; }
         }
 
-        /* --- 標籤內部排版 --- */
-        .box-label .date-area { position: absolute; top: 6mm; left: 8mm; text-align: left; }
-        .box-label .info-row { font-size: 20pt; font-weight: bold; line-height: 1.3; }
-        .box-label .spec-main {
-            position: absolute; width: 100%; top: 48%; transform: translateY(-50%);
-            text-align: center; font-size: 36pt; font-weight: 900;
+        /* --- 外箱標籤佈局 --- */
+        .box-label { 
+            display: flex; 
+            flex-direction: column; 
+            padding: 3mm 5mm; 
+            justify-content: space-between; 
         }
-        .box-label .footer-name { position: absolute; bottom: 6mm; left: 0; right: 0; display: flex; justify-content: center; }
+
+        .box-label .top-row { 
+            flex: 0 0 28%; 
+            display: flex; 
+            flex-direction: column;
+            justify-content: center;
+            border-bottom: 2.5px solid #333; 
+        }
+
+        .box-label .date-area { 
+            font-size: 20pt; 
+            font-weight: bold; 
+            line-height: 1.3; 
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .box-label .spec-main { 
+            flex: 1; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            text-align: center;
+            overflow: hidden;
+            word-break: break-all;
+            padding: 1mm 0;
+        }
+
+        .box-label .footer-name { 
+            flex: 0 0 28%; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            box-sizing: border-box;
+            padding-top: 1mm;
+        }
+
         .box-label .name-border { 
-            border: 5px solid black; text-align: center; font-size: 34pt; font-weight: 900; 
-            padding: 3px 10px; width: calc(100% - 18mm); background: white;
+            border: 4px solid black; 
+            text-align: center; 
+            font-weight: 900; 
+            background: white; 
+            white-space: nowrap; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            width: 100%; 
+            height: 90%; 
+            overflow: hidden;
+            padding: 2px 5px;
         }
-        .spec-label .name-top { position: absolute; width: 100%; top: 2mm; text-align: center; font-weight: 900; }
-        .spec-label .spec-big { position: absolute; width: 100%; bottom: 2mm; text-align: center; font-size: 23pt; font-weight: 900; }
+        
+        /* --- 品規標籤佈局：優化版 --- */
+        .spec-label {
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            text-align: center;
+            justify-content: flex-start; /* 改為靠上排列，透過高度控制 */
+        }
+
+        .spec-label .name-top { 
+            height: 58%; /* 稍微拉大品名空間 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900; 
+            overflow: hidden; 
+            line-height: 1.0;
+            word-break: break-all;
+            padding: 1mm 1mm 0 1mm;
+        }
+
+        .spec-label .spec-big { 
+            height: 42%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900; 
+            overflow: hidden; 
+            white-space: nowrap; 
+            line-height: 1;
+            box-sizing: border-box;
+            /* 實作：將規格上移 0.2cm (2mm) 並預留緩衝 */
+            padding-bottom: 2.5mm; 
+        }
+        
+        .toast { 
+            position: fixed; 
+            bottom: 30px; 
+            right: 30px; 
+            background: rgba(44, 62, 80, 0.95); 
+            color: white; 
+            padding: 15px 30px; 
+            border-radius: 50px; 
+            display: none; 
+            z-index: 2000; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
 
 <div class="header no-print">
-    <h2>🥬 生菜標籤管理系統 <span style="font-size: 14px; opacity: 0.7;">v12.8 Professional</span></h2>
+    <h2>🥬 生菜標籤管理系統 <span style="font-weight: 300; opacity: 0.8; font-size: 16px;">v13.9</span></h2>
+    <div style="font-size: 14px; opacity: 0.9;">
+        品規貼格式優化 (不溢出/不重疊)
+    </div>
 </div>
 
 <div class="controls no-print">
-    
-    <div class="card setting-group">
-        <div>
-            <label style="display:block; font-size: 13px; color: #666; margin-bottom: 5px;">製作日期 (統一)</label>
-            <input type="date" id="packDate">
-        </div>
-
-        <div>
-            <label style="display:block; font-size: 13px; color: #666; margin-bottom: 5px;">列印模式選擇</label>
-            <select id="labelMode" onchange="generatePreview()">
-                <option value="box">📦 外箱貼 (84.9 x 62.4 mm)</option>
-                <option value="spec">🏷️ 品規貼 (35 x 25 mm)</option>
-            </select>
-        </div>
-
-        <div class="batch-action">
-            <div>
-                <label style="display:block; font-size: 12px; color: #0056b3; margin-bottom: 4px;">快速套用原料月份</label>
-                <select id="batchMonthSelect">
-                    <option value="">(空白)</option>
-                    <option value="01">01月</option><option value="02">02月</option>
-                    <option value="03">03月</option><option value="04">04月</option>
-                    <option value="05">05月</option><option value="06">06月</option>
-                    <option value="07">07月</option><option value="08">08月</option>
-                    <option value="09">09月</option><option value="10">10月</option>
-                    <option value="11">11月</option><option value="12">12月</option>
+    <div class="card">
+        <div class="setup-grid">
+            <div class="setup-item">
+                <label>📅 製作日期</label>
+                <input type="date" id="packDate">
+            </div>
+            
+            <div class="setup-item">
+                <label>📄 列印模式</label>
+                <select id="labelMode" onchange="generatePreview()">
+                    <option value="box">📦 外箱貼 (84.9x62.4mm)</option>
+                    <option value="spec">🏷️ 品規貼 (35x25mm)</option>
                 </select>
             </div>
-            <button class="btn-apply" onclick="applyBatchMonth()">套用至全部品項</button>
+
+            <div class="setup-item">
+                <label>🌙 快速設定原料月份</label>
+                <select id="batchMonth" onchange="applyBatchMonth()">
+                    <option value="">選擇月份</option>
+                    <script>
+                        for(let i=1; i<=12; i++) {
+                            let m = i.toString().padStart(2, '0');
+                            document.write(`<option value="${m}">${m}月</option>`);
+                        }
+                    </script>
+                </select>
+            </div>
+
+            <div class="setup-item">
+                <label>操作功能</label>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn-paste" style="flex: 1;" onclick="pasteFromClipboard()">📋 貼上 Excel</button>
+                    <button class="btn-clear" onclick="clearNumbers()">重置</button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="card table-container">
-        <table id="inputTable">
+    <div class="card" style="padding: 0; overflow: hidden;">
+        <table id="mainTable">
             <thead>
                 <tr>
-                    <th>製作品項</th>
-                    <th>原料月份</th>
-                    <th>1kg 數量 (3入/箱)</th>
-                    <th>300g 數量 (10入/箱)</th>
-                    <th style="background-color: #fff9db;">樣品數量</th>
+                    <th width="180">製作品項</th>
+                    <th width="100">原料月份</th>
+                    <th>1kg 箱數<br><small>(3入/箱)</small></th>
+                    <th>300g 箱數<br><small>(10入/箱)</small></th>
+                    <th style="background-color: #f1f4f8; color: var(--neutral-accent);">自訂規格文字 與 數量</th>
+                    <th>樣品</th>
                 </tr>
             </thead>
             <tbody id="tableBody"></tbody>
+            <tfoot>
+                <tr class="custom-row">
+                    <td><input type="text" id="blankName" class="input-blank-name" placeholder="+ 手寫新增品項"></td>
+                    <td><select id="blankMonth" class="row-month" style="padding: 6px;"></select></td>
+                    <td><input type="number" id="blank1k" value="0" onfocus="this.select()"></td>
+                    <td><input type="number" id="blank300" value="0" onfocus="this.select()"></td>
+                    <td style="background-color: #f8f9fa;">
+                        <input type="text" id="blankSpecTxt" class="spec-input-text" placeholder="自訂規格">
+                        <input type="number" id="blankSpecQty" value="0" onfocus="this.select()">
+                    </td>
+                    <td><input type="number" id="blankSample" value="0" onfocus="this.select()"></td>
+                </tr>
+            </tfoot>
         </table>
-    </div>
-
-    <div class="btn-group">
-        <button class="btn-preview" onclick="generatePreview()">✨ 產生預覽</button>
-        <button class="btn-print" onclick="window.print()">🖨️ 確認列印標籤</button>
-        <button class="btn-clear" onclick="clearNumbers()">🗑️ 全部歸零</button>
+        
+        <div class="action-bar no-print">
+            <button class="btn-preview" onclick="generatePreview()">✨ 產生標籤預覽</button>
+            <button class="btn-print" onclick="window.print()">🖨️ 確認列印標籤</button>
+        </div>
     </div>
 </div>
 
+<div id="toast" class="toast">數據已成功匯入！</div>
 <div id="printArea"></div>
 
 <script>
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('packDate').value = today;
-
-    const productList = ["紅捲", "綠捲鬚", "紅橡木", "綠橡木", "紅火焰", "綠火焰", "紅蘿蔓", "奶油生菜", "羽衣甘藍", "歐芹", "紅包心生菜"];
-
-    function getMonthOptionsHTML() {
-        let html = `<option value="">(空白)</option>`;
-        for (let i = 1; i <= 12; i++) {
-            let m = i.toString().padStart(2, '0');
-            html += `<option value="${m}">${m}月</option>`;
-        }
-        return html;
-    }
+    document.getElementById('packDate').value = new Date().toISOString().split('T')[0];
+    
+    const products = [
+        "紅捲", "綠捲鬚", "紅橡木", "綠橡木", "紅火焰", "綠火焰", "紅蘿蔓", 
+        "奶油生菜", "羽衣甘藍", "歐芹", "紅包心",
+        "紅甜脆", "綠甜脆", "綠水晶"
+    ];
+    
+    const displayNames = {
+        "紅甜脆": "紅甜脆［水耕］",
+        "綠甜脆": "綠甜脆［水耕］",
+        "綠水晶": "綠水晶［水耕］"
+    };
 
     const tbody = document.getElementById('tableBody');
-    productList.forEach(name => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td class="product-name">${name}</td>
-            <td><select class="row-source-month">${getMonthOptionsHTML()}</select></td>
-            <td><input type="number" class="qty-1k" value="0" min="0" onfocus="this.select()"></td>
-            <td><input type="number" class="qty-300g" value="0" min="0" onfocus="this.select()"></td>
-            <td><input type="number" class="qty-sample" value="0" min="0" onfocus="this.select()" style="background-color: #fff9db;"></td>
-        `;
-        tbody.appendChild(row);
-    });
+    const getMonthHTML = () => {
+        let h = `<option value="">--</option>`;
+        for(let i=1; i<=12; i++) h += `<option value="${i.toString().padStart(2,'0')}">${i}月</option>`;
+        return h;
+    };
 
-    function applyBatchMonth() {
-        const selectedMonth = document.getElementById('batchMonthSelect').value;
-        document.querySelectorAll('.row-source-month').forEach(select => {
-            select.value = selectedMonth;
-        });
+    products.forEach(key => {
+        const name = displayNames[key] || key;
+        tbody.innerHTML += `
+            <tr data-name="${key}">
+                <td class="product-name">${name}</td>
+                <td><select class="row-month">${getMonthHTML()}</select></td>
+                <td><input type="number" class="q1k" value="0" onfocus="this.select()"></td>
+                <td><input type="number" class="q300" value="0" onfocus="this.select()"></td>
+                <td style="background-color: #f8f9fa;">
+                    <input type="text" class="sText" class="spec-input-text" placeholder="輸入規格">
+                    <input type="number" class="sQty" value="0" onfocus="this.select()">
+                </td>
+                <td><input type="number" class="qSample" value="0" onfocus="this.select()"></td>
+            </tr>
+        `;
+    });
+    document.getElementById('blankMonth').innerHTML = getMonthHTML();
+
+    async function pasteFromClipboard() {
+        try {
+            const text = await navigator.clipboard.readText();
+            if (!text) {
+                showToast("剪貼簿沒有內容，請先在 Excel 複製範圍");
+                return;
+            }
+            processData(text);
+        } catch (err) {
+            const manualText = prompt("請貼上從 Excel 複製的數據內容：");
+            if (manualText) processData(manualText);
+        }
     }
 
-    function formatPackDate(dateStr) {
-        if(!dateStr) return "";
-        const [y, m, d] = dateStr.split('-');
-        return `${m}/${d}`;
+    function processData(text) {
+        const lines = text.trim().split(/\r?\n/);
+        let count = 0;
+
+        lines.forEach(line => {
+            const parts = line.split(/[,\t]/);
+            if(parts.length < 2) return;
+
+            const inputName = parts[0].trim();
+            if(inputName.includes("品項") || inputName.includes("1kg") || inputName.includes("製作")) return;
+
+            const val1k = parseInt(parts[1]) || 0;
+            const val300 = parseInt(parts[2]) || 0;
+            const valCustom = parseInt(parts[3]) || 0;
+
+            let targetRow = null;
+            products.forEach(pKey => {
+                const cleanInput = inputName.replace(/生菜|［.*?］|\[.*?\]/g, "");
+                if(cleanInput === pKey || inputName.includes(pKey)) {
+                    targetRow = document.querySelector(`tr[data-name="${pKey}"]`);
+                }
+            });
+
+            if(targetRow) {
+                targetRow.querySelector('.q1k').value = val1k;
+                targetRow.querySelector('.q300').value = val300;
+                if (parts[3] !== undefined) targetRow.querySelector('.sQty').value = valCustom;
+                
+                targetRow.classList.add('row-updated');
+                setTimeout(() => targetRow.classList.remove('row-updated'), 2000);
+                count++;
+            } else if (inputName !== "") {
+                document.getElementById('blankName').value = inputName;
+                document.getElementById('blank1k').value = val1k;
+                document.getElementById('blank300').value = val300;
+                count++;
+            }
+        });
+
+        if(count > 0) {
+            showToast(`成功匯入 ${count} 列數據`);
+            generatePreview();
+        } else {
+            showToast("無法辨識數據，請確認 Excel 選取範圍");
+        }
+    }
+
+    function showToast(msg) {
+        const toast = document.getElementById('toast');
+        toast.innerText = msg;
+        toast.style.display = 'block';
+        setTimeout(() => toast.style.display = 'none', 3000);
+    }
+
+    function applyBatchMonth() {
+        const m = document.getElementById('batchMonth').value;
+        document.querySelectorAll('.row-month').forEach(s => s.value = m);
     }
 
     function clearNumbers() {
-        if(confirm("確定要將所有數量歸零嗎？")) {
-            document.querySelectorAll('.qty-1k, .qty-300g, .qty-sample').forEach(input => input.value = 0);
-            document.getElementById('printArea').innerHTML = "";
-        }
+        if(!confirm("確定要重置所有內容嗎？")) return;
+        document.querySelectorAll('input[type="number"]').forEach(i => i.value = 0);
+        document.querySelectorAll('input[type="text"]').forEach(i => i.value = "");
+        document.querySelectorAll('.row-month').forEach(s => s.selectedIndex = 0);
+        document.getElementById('batchMonth').selectedIndex = 0;
+        document.getElementById('printArea').innerHTML = "";
+        showToast("已重置所有內容(含月份)");
     }
 
     function generatePreview() {
         const mode = document.getElementById('labelMode').value;
-        const pDate = formatPackDate(document.getElementById('packDate').value); 
+        const pDate = document.getElementById('packDate').value.split('-').slice(1).join('/');
         const printArea = document.getElementById('printArea');
-        printArea.innerHTML = ""; 
+        printArea.innerHTML = "";
 
         document.querySelectorAll('#tableBody tr').forEach(row => {
             const name = row.querySelector('.product-name').innerText;
-            const monthVal = row.querySelector('.row-source-month').value;
-            const q1k = parseInt(row.querySelector('.qty-1k').value) || 0;
-            const q300 = parseInt(row.querySelector('.qty-300g').value) || 0;
-            const qSample = parseInt(row.querySelector('.qty-sample').value) || 0;
+            const mVal = row.querySelector('.row-month').value;
+            const sMonth = mVal ? mVal : "　";
+            
+            const q1 = parseInt(row.querySelector('.q1k').value) || 0;
+            const q3 = parseInt(row.querySelector('.q300').value) || 0;
+            const customTxt = row.querySelector('.sText').value || "自訂規格";
+            const customQty = parseInt(row.querySelector('.sQty').value) || 0;
+            const qS = parseInt(row.querySelector('.qSample').value) || 0;
 
-            const sMonth = monthVal ? `${monthVal}/` : "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/";
-
-            if (mode === 'spec') {
-                for(let i=0; i<q1k; i++) printArea.innerHTML += createSpecHTML(name, "1K");
-                for(let i=0; i<q300; i++) printArea.innerHTML += createSpecHTML(name, "300g");
-                for(let i=0; i<qSample; i++) printArea.innerHTML += createSpecHTML(name, "樣品");
-            } else {
-                // 1KG 邏輯
-                if (q1k > 0) {
-                    const full = Math.floor(q1k / 3), rem = q1k % 3;
-                    for(let i=0; i<full; i++) printArea.innerHTML += createBoxHTML(name, "1KG*3包", sMonth, pDate);
-                    if(rem > 0) printArea.innerHTML += createBoxHTML(name, `1KG*${rem}包`, sMonth, pDate);
-                }
-                // 300G 邏輯
-                if (q300 > 0) {
-                    const full = Math.floor(q300 / 10), rem = q300 % 10;
-                    for(let i=0; i<full; i++) printArea.innerHTML += createBoxHTML(name, "300G*10包", sMonth, pDate);
-                    if(rem > 0) printArea.innerHTML += createBoxHTML(name, `300G*${rem}包`, sMonth, pDate);
-                }
-                // 樣品 邏輯 (1比1)
-                if (qSample > 0) {
-                    for(let i=0; i<qSample; i++) printArea.innerHTML += createBoxHTML(name, "樣品", sMonth, pDate);
-                }
-            }
+            renderLabels(printArea, mode, name, q1, q3, customTxt, customQty, qS, sMonth, pDate);
         });
-        if(printArea.innerHTML === "") {
-            printArea.innerHTML = "<p style='color:#999; margin-top:20px;'>請輸入數量並點擊「產生預覽」</p>";
+
+        const bName = document.getElementById('blankName').value;
+        if(bName) {
+            const bmVal = document.getElementById('blankMonth').value;
+            const bsMonth = bmVal ? bmVal : "　";
+            
+            const bq1 = parseInt(document.getElementById('blank1k').value) || 0;
+            const bq3 = parseInt(document.getElementById('blank300').value) || 0;
+            const bTxt = document.getElementById('blankSpecTxt').value || "自訂規格";
+            const bQty = parseInt(document.getElementById('blankSpecQty').value) || 0;
+            const bqS = parseInt(document.getElementById('blankSample').value) || 0;
+            renderLabels(printArea, mode, bName, bq1, bq3, bTxt, bQty, bqS, bsMonth, pDate);
+        }
+        
+        printArea.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function renderLabels(area, mode, name, q1, q3, cTxt, cQty, qS, m, d) {
+        if(mode === 'spec') {
+            for(let i=0; i<q1; i++) area.innerHTML += createSpec(name, "1K");
+            for(let i=0; i<q3; i++) area.innerHTML += createSpec(name, "300g");
+            for(let i=0; i<cQty; i++) area.innerHTML += createSpec(name, cTxt);
+            for(let i=0; i<qS; i++) area.innerHTML += createSpec(name, "樣品");
+        } else {
+            addBoxLabels(area, name, q1, 3, "1KG", m, d);
+            addBoxLabels(area, name, q3, 10, "300G", m, d);
+            if(cQty > 0) {
+                for(let i=0; i<cQty; i++) area.innerHTML += createBox(name, cTxt, m, d);
+            }
+            if(qS > 0) {
+                for(let i=0; i<qS; i++) area.innerHTML += createBox(name, "樣品", m, d);
+            }
         }
     }
 
-    function createBoxHTML(name, specText, sMonth, pDate) {
+    function addBoxLabels(area, name, total, perBox, unit, m, d) {
+        if(total <= 0) return;
+        const full = Math.floor(total / perBox);
+        const rem = total % perBox;
+        for(let i=0; i<full; i++) area.innerHTML += createBox(name, `${unit}*${perBox}包`, m, d);
+        if(rem > 0) area.innerHTML += createBox(name, `${unit}*${rem}包`, m, d);
+    }
+
+    function getFontSizeForWidth(text, maxWidth, baseSize, bold = true) {
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        let size = baseSize;
+        const adjustedMaxWidth = maxWidth - 2; 
+        context.font = `${bold ? '900' : 'bold'} ${size}pt "Microsoft JhengHei"`;
+        
+        while (context.measureText(text).width > adjustedMaxWidth && size > 5) {
+            size -= 0.5;
+            context.font = `${bold ? '900' : 'bold'} ${size}pt "Microsoft JhengHei"`;
+        }
+        return `${size}pt`;
+    }
+
+    function createBox(n, s, m, d) {
+        const specFontSize = getFontSizeForWidth(s, 240, 36); 
+        const nameFontSize = getFontSizeForWidth(n, 220, 32);
+        
         return `<div class="label-page box-size box-label">
-            <div class="date-area">
-                <div class="info-row">原料日期：${sMonth}</div>
-                <div class="info-row">製作日期：${pDate}</div>
+            <div class="top-row">
+                <div class="date-area">
+                    原料日期：${m}  / <br>
+                    製作日期：${d}  
+                </div>
             </div>
-            <div class="spec-main">${specText}</div>
-            <div class="footer-name"><div class="name-border">${name}</div></div>
+            
+            <div class="spec-main" style="font-size: ${specFontSize}">
+                ${s}
+            </div>
+            
+            <div class="footer-name">
+                <div class="name-border" style="font-size: ${nameFontSize}">
+                    ${n}
+                </div>
+            </div>
         </div>`;
     }
 
-    function createSpecHTML(name, shortSpec) {
-        let fontSize = "23pt"; 
-        if (name.length === 4) fontSize = "18pt";
-        else if (name.length >= 5) fontSize = "14pt";
+    // --- 品規格式優化 (不溢出/不重疊) ---
+    function createSpec(n, s) {
+        let displayName = n;
+        // 1. 品名分行處理
+        if (n.includes("［")) {
+            displayName = n.replace("［", "<br>［");
+        } else if (n.length > 5) {
+            const mid = Math.ceil(n.length / 2);
+            displayName = n.substring(0, mid) + "<br>" + n.substring(mid);
+        }
+        
+        const lines = displayName.split("<br>");
+        const longestLine = lines.reduce((a, b) => a.length > b.length ? a : b);
+        
+        // 2. 品名縮放 (空間限制更嚴格)
+        const nameFontSize = getFontSizeForWidth(longestLine, 120, 18);
+        
+        // 3. 規格縮放 (確保 nowrap 且字級在安全範圍內)
+        // 寬度限制設為 128px (35mm扣除內距)，基準縮小5% (20.9)，確保絕對不溢出
+        const specBigFontSize = getFontSizeForWidth(s, 128, 20.9);
 
         return `<div class="label-page spec-size spec-label">
-            <div class="name-top" style="font-size: ${fontSize};">${name}</div>
-            <div class="spec-big">${shortSpec}</div>
+            <div class="name-top" style="font-size: ${nameFontSize}">${displayName}</div>
+            <div class="spec-big" style="font-size: ${specBigFontSize}"><span>${s}</span></div>
         </div>`;
     }
 </script>
