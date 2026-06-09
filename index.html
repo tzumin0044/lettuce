@@ -408,15 +408,15 @@
     document.getElementById('packDate').value = new Date().toISOString().split('T')[0];
     
     const products = [
-        "紅捲", "綠捲鬚", "紅橡木", "綠橡木", "紅火焰", "綠火焰", "紅蘿蔓", 
-        "奶油生菜", "羽衣甘藍", "歐芹", "紅包心",
-        "紅甜脆", "綠甜脆", "綠水晶"
+        "紅捲", "綠捲鬚", "紅橡", "綠橡", "紅火焰", "綠火焰", "紅蘿蔓", 
+        "奶油生菜", "羽衣甘藍", "歐芹", "巴西里", "紅包心生菜",
+        "紅甜脆", "綠甜脆", "綠水晶", "廣東生菜", "小番茄"
     ];
     
     const displayNames = {
-        "紅甜脆": "紅甜脆［水耕］",
-        "綠甜脆": "綠甜脆［水耕］",
-        "綠水晶": "綠水晶［水耕］"
+        "紅甜脆": "紅甜脆生菜〔水耕〕",
+        "綠甜脆": "綠甜脆生菜〔水耕〕",
+        "綠水晶": "綠水晶生菜〔水耕〕"
     };
 
     const tbody = document.getElementById('tableBody');
@@ -475,8 +475,9 @@
 
             let targetRow = null;
             products.forEach(pKey => {
-                const cleanInput = inputName.replace(/生菜|［.*?］|\[.*?\]/g, "");
-                if(cleanInput === pKey || inputName.includes(pKey)) {
+                const cleanInput = inputName.replace(/生菜|［.*?］|\[.*?\]|〔.*?〕/g, "").replace(/木$/, "").trim();
+                const cleanKey = pKey.replace(/生菜|［.*?］|\[.*?\]|〔.*?〕/g, "").replace(/木$/, "").trim();
+                if(cleanInput === cleanKey || inputName.includes(pKey) || pKey.includes(cleanInput)) {
                     targetRow = document.querySelector(`tr[data-name="${pKey}"]`);
                 }
             });
