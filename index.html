@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+
 <head>
     <meta charset="UTF-8">
     <title>生菜標籤管理系統 v13.9 - 品規格式優化版</title>
@@ -9,54 +10,55 @@
             --primary-accent: #007bff;
             --success-green: #2ecc71;
             --danger-red: #e74c3c;
-            --neutral-accent: #34495e; 
+            --neutral-accent: #34495e;
             --bg-soft: #f8f9fa;
             --border-color: #e0e6ed;
             --text-main: #2c3e50;
         }
 
-        body { 
-            background: var(--bg-soft); 
-            font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; 
-            margin: 0; 
-            padding: 20px; 
+        body {
+            background: var(--bg-soft);
+            font-family: "PingFang TC", "Microsoft JhengHei", sans-serif;
+            margin: 0;
+            padding: 20px;
             color: var(--text-main);
         }
-        
-        .header { 
-            background: linear-gradient(135deg, var(--primary-dark) 0%, #2c3e50 100%); 
-            color: white; 
-            padding: 15px 30px; 
-            border-radius: 12px; 
-            margin-bottom: 20px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, #2c3e50 100%);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
-        .header h2 { 
-            margin: 0; 
-            font-size: 22px; 
+
+        .header h2 {
+            margin: 0;
+            font-size: 22px;
             font-weight: 600;
             display: flex;
             align-items: center;
             gap: 12px;
         }
 
-        .card { 
-            background: white; 
-            padding: 20px; 
-            border-radius: 12px; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
-            margin-bottom: 20px; 
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
             border: 1px solid var(--border-color);
         }
-        
-        .setup-grid { 
-            display: grid; 
+
+        .setup-grid {
+            display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px; 
-            align-items: flex-end; 
+            gap: 20px;
+            align-items: flex-end;
         }
 
         .setup-item {
@@ -70,8 +72,9 @@
             font-size: 14px;
             color: #5d6d7e;
         }
-        
-        .setup-grid select, .setup-grid input[type="date"] {
+
+        .setup-grid select,
+        .setup-grid input[type="date"] {
             padding: 10px 12px;
             border-radius: 8px;
             border: 1px solid var(--border-color);
@@ -80,71 +83,100 @@
             background-color: white;
         }
 
-        table { 
-            border-collapse: separate; 
+        table {
+            border-collapse: separate;
             border-spacing: 0;
-            width: 100%; 
-            margin-top: 10px; 
-            background: white; 
+            width: 100%;
+            margin-top: 10px;
+            background: white;
             border-radius: 8px;
             overflow: hidden;
             border: 1px solid var(--border-color);
         }
-        th { 
-            background: #f1f4f8; 
-            padding: 15px 12px; 
+
+        th {
+            background: #f1f4f8;
+            padding: 15px 12px;
             border-bottom: 2px solid var(--border-color);
-            color: #5d6d7e; 
-            font-size: 14px; 
+            color: #5d6d7e;
+            font-size: 14px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        td { 
-            padding: 12px; 
+
+        td {
+            padding: 12px;
             border-bottom: 1px solid var(--border-color);
-            text-align: center; 
-            transition: all 0.3s ease; 
+            text-align: center;
+            transition: all 0.3s ease;
         }
-        
-        .product-name { 
-            text-align: left; 
-            font-weight: 600; 
-            padding-left: 20px; 
+
+        .product-name {
+            text-align: left;
+            font-weight: 600;
+            padding-left: 20px;
             color: var(--text-main);
             background: #fafbfc;
         }
-        
-        .custom-row { background-color: #f1f4f8 !important; } 
-        .row-updated { background-color: #e8f8f5 !important; animation: highlightFade 2s ease; }
-        
+
+        .custom-row {
+            background-color: #f1f4f8 !important;
+        }
+
+        .row-updated {
+            background-color: #e8f8f5 !important;
+            animation: highlightFade 2s ease;
+        }
+
         @keyframes highlightFade {
-            from { background-color: #d1f2eb; }
-            to { background-color: #e8f8f5; }
+            from {
+                background-color: #d1f2eb;
+            }
+
+            to {
+                background-color: #e8f8f5;
+            }
         }
 
-        input[type="number"] { 
-            width: 65px; 
-            padding: 8px; 
+        input[type="number"] {
+            width: 65px;
+            padding: 8px;
             border: 1px solid var(--border-color);
-            border-radius: 6px; 
-            text-align: center; 
-            font-weight: 600; 
-            color: var(--primary-accent); 
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--primary-accent);
             transition: border-color 0.2s;
         }
-        input[type="number"]:focus { border-color: var(--primary-accent); outline: none; }
-        
-        input[type="text"] { 
-            padding: 8px; 
-            border: 1px solid var(--border-color);
-            border-radius: 6px; 
-            outline: none; 
-            transition: border-color 0.2s;
-        }
-        input[type="text"]:focus { border-color: var(--neutral-accent); }
 
-        .spec-input-text { width: 100px; font-size: 13px; border-style: dashed !important; }
-        .input-blank-name { width: 130px; font-weight: bold; border-color: var(--neutral-accent) !important; }
+        input[type="number"]:focus {
+            border-color: var(--primary-accent);
+            outline: none;
+        }
+
+        input[type="text"] {
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--neutral-accent);
+        }
+
+        .spec-input-text {
+            width: 100px;
+            font-size: 13px;
+            border-style: dashed !important;
+        }
+
+        .input-blank-name {
+            width: 130px;
+            font-weight: bold;
+            border-color: var(--neutral-accent) !important;
+        }
 
         .action-bar {
             display: flex;
@@ -156,85 +188,148 @@
             border-radius: 12px;
         }
 
-        button { 
-            padding: 10px 24px; 
-            cursor: pointer; 
-            border: none; 
-            border-radius: 8px; 
-            font-weight: 600; 
-            transition: all 0.2s ease; 
-            display: flex; 
-            align-items: center; 
+        button {
+            padding: 10px 24px;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
             justify-content: center;
-            gap: 10px; 
+            gap: 10px;
             font-size: 15px;
         }
-        button:active { transform: translateY(1px); }
 
-        .btn-preview { background: var(--primary-accent); color: white; box-shadow: 0 4px 10px rgba(0,123,255,0.2); }
-        .btn-preview:hover { background: #0069d9; }
-        
-        .btn-print { background: var(--success-green); color: white; box-shadow: 0 4px 10px rgba(46,204,113,0.2); }
-        .btn-print:hover { background: #27ae60; }
-        
-        .btn-paste { 
-            background: var(--neutral-accent); 
-            color: white; 
-            box-shadow: 0 4px 10px rgba(52,73,94,0.2);
+        button:active {
+            transform: translateY(1px);
+        }
+
+        .btn-preview {
+            background: var(--primary-accent);
+            color: white;
+            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+        }
+
+        .btn-preview:hover {
+            background: #0069d9;
+        }
+
+        .btn-print {
+            background: var(--success-green);
+            color: white;
+            box-shadow: 0 4px 10px rgba(46, 204, 113, 0.2);
+        }
+
+        .btn-print:hover {
+            background: #27ae60;
+        }
+
+        .btn-paste {
+            background: var(--neutral-accent);
+            color: white;
+            box-shadow: 0 4px 10px rgba(52, 73, 94, 0.2);
             height: 42px;
         }
-        .btn-paste:hover { background: #2c3e50; }
-        
-        .btn-clear { background: #95a5a6; color: white; height: 42px; }
-        .btn-clear:hover { background: #7f8c8d; }
 
-        #printArea { padding: 20px; display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; }
-        .label-page { 
-            background: white; 
-            display: inline-block; 
-            box-sizing: border-box; 
-            position: relative; 
-            overflow: hidden; 
-            color: black; 
-            border: 1px solid #eee; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        .btn-paste:hover {
+            background: #2c3e50;
         }
-        .box-size { width: 84.9mm; height: 62.4mm; max-width: 84.9mm; max-height: 62.4mm; }
-        .spec-size { width: 35mm; height: 25mm; max-width: 35mm; max-height: 25mm; }
+
+        .btn-clear {
+            background: #95a5a6;
+            color: white;
+            height: 42px;
+        }
+
+        .btn-clear:hover {
+            background: #7f8c8d;
+        }
+
+        #printArea {
+            padding: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .label-page {
+            background: white;
+            display: inline-block;
+            box-sizing: border-box;
+            position: relative;
+            overflow: hidden;
+            color: black;
+            border: 1px solid #eee;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .box-size {
+            width: 84.9mm;
+            height: 62.4mm;
+            max-width: 84.9mm;
+            max-height: 62.4mm;
+        }
+
+        .spec-size {
+            width: 35mm;
+            height: 25mm;
+            max-width: 35mm;
+            max-height: 25mm;
+        }
 
         @media print {
-            .no-print { display: none !important; }
-            body { padding: 0; background: white; }
-            #printArea { padding: 0; display: block; }
-            .label-page { border: none; margin: 0; page-break-after: always; display: block; box-shadow: none; }
+            .no-print {
+                display: none !important;
+            }
+
+            body {
+                padding: 0;
+                background: white;
+            }
+
+            #printArea {
+                padding: 0;
+                display: block;
+            }
+
+            .label-page {
+                border: none;
+                margin: 0;
+                page-break-after: always;
+                display: block;
+                box-shadow: none;
+            }
         }
 
         /* --- 外箱標籤佈局 --- */
-        .box-label { 
-            display: flex; 
-            flex-direction: column; 
-            padding: 3mm 5mm; 
-            justify-content: space-between; 
+        .box-label {
+            display: flex;
+            flex-direction: column;
+            padding: 3mm 5mm;
+            justify-content: space-between;
         }
 
-        .box-label .top-row { 
-            flex: 0 0 28%; 
-            display: flex; 
+        .box-label .top-row {
+            flex: 0 0 28%;
+            display: flex;
             flex-direction: column;
             justify-content: center;
-            border-bottom: 2.5px solid #333; 
+            border-bottom: 2.5px solid #333;
         }
 
-        .box-label .date-area { 
-            font-size: 20pt; 
-            font-weight: bold; 
-            line-height: 1.3; 
+        .box-label .date-area {
+            font-size: 20pt;
+            font-weight: bold;
+            line-height: 1.3;
             text-align: left;
             white-space: nowrap;
         }
 
-        .box-label .spec-main { 
-            flex: 1; 
+        .box-label .spec-main {
+            flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -245,190 +340,193 @@
             padding: 1mm 0;
         }
 
-        .box-label .footer-name { 
-            flex: 0 0 28%; 
-            display: flex; 
-            justify-content: center; 
+        .box-label .footer-name {
+            flex: 0 0 28%;
+            display: flex;
+            justify-content: center;
             align-items: center;
             box-sizing: border-box;
             padding-top: 1mm;
         }
 
-        .box-label .name-border { 
-            border: 4px solid black; 
-            text-align: center; 
-            font-weight: 900; 
-            background: white; 
-            white-space: nowrap; 
+        .box-label .name-border {
+            border: 4px solid black;
+            text-align: center;
+            font-weight: 900;
+            background: white;
+            white-space: nowrap;
             display: flex;
             align-items: center;
             justify-content: center;
             box-sizing: border-box;
-            width: 100%; 
-            height: 90%; 
+            width: 100%;
+            height: 90%;
             overflow: hidden;
             padding: 2px 5px;
         }
-        
+
         /* --- 品規標籤佈局：優化版 --- */
         .spec-label {
             display: flex;
             flex-direction: column;
             padding: 0;
             text-align: center;
-            justify-content: flex-start; /* 改為靠上排列，透過高度控制 */
+            justify-content: flex-start;
+            /* 改為靠上排列，透過高度控制 */
         }
 
-        .spec-label .name-top { 
-            height: 58%; /* 稍微拉大品名空間 */
+        .spec-label .name-top {
+            height: 58%;
+            /* 稍微拉大品名空間 */
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 900; 
-            overflow: hidden; 
+            font-weight: 900;
+            overflow: hidden;
             line-height: 1.0;
             word-break: break-all;
             padding: 1mm 1mm 0 1mm;
         }
 
-        .spec-label .spec-big { 
+        .spec-label .spec-big {
             height: 42%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 900; 
-            overflow: hidden; 
-            white-space: nowrap; 
+            font-weight: 900;
+            overflow: hidden;
+            white-space: nowrap;
             line-height: 1;
             box-sizing: border-box;
             /* 實作：將規格上移 0.2cm (2mm) 並預留緩衝 */
-            padding-bottom: 2.5mm; 
+            padding-bottom: 2.5mm;
         }
-        
-        .toast { 
-            position: fixed; 
-            bottom: 30px; 
-            right: 30px; 
-            background: rgba(44, 62, 80, 0.95); 
-            color: white; 
-            padding: 15px 30px; 
-            border-radius: 50px; 
-            display: none; 
-            z-index: 2000; 
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(44, 62, 80, 0.95);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            display: none;
+            z-index: 2000;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
             font-weight: 600;
         }
     </style>
 </head>
+
 <body>
 
-<div class="header no-print">
-    <h2>🥬 生菜標籤管理系統 <span style="font-weight: 300; opacity: 0.8; font-size: 16px;">v13.9</span></h2>
-   
-</div>
+    <div class="header no-print">
+        <h2>🥬 生菜標籤管理系統 <span style="font-weight: 300; opacity: 0.8; font-size: 16px;">v13.9</span></h2>
 
-<div class="controls no-print">
-    <div class="card">
-        <div class="setup-grid">
-            <div class="setup-item">
-                <label>📅 製作日期</label>
-                <input type="date" id="packDate">
-            </div>
-            
-            <div class="setup-item">
-                <label>📄 列印模式</label>
-                <select id="labelMode" onchange="generatePreview()">
-                    <option value="box">📦 外箱貼 (84.9x62.4mm)</option>
-                    <option value="spec">🏷️ 品規貼 (35x25mm)</option>
-                </select>
-            </div>
+    </div>
 
-            <div class="setup-item">
-                <label>🌙 快速設定原料月份</label>
-                <select id="batchMonth" onchange="applyBatchMonth()">
-                    <option value="">選擇月份</option>
-                    <script>
-                        for(let i=1; i<=12; i++) {
-                            let m = i.toString().padStart(2, '0');
-                            document.write(`<option value="${m}">${m}月</option>`);
-                        }
-                    </script>
-                </select>
-            </div>
+    <div class="controls no-print">
+        <div class="card">
+            <div class="setup-grid">
+                <div class="setup-item">
+                    <label>📅 製作日期</label>
+                    <input type="date" id="packDate">
+                </div>
 
-            <div class="setup-item">
-                <label>操作功能</label>
-                <div style="display: flex; gap: 10px;">
-                    <button class="btn-paste" style="flex: 1;" onclick="pasteFromClipboard()">📋 貼上 Excel</button>
-                    <button class="btn-clear" onclick="clearNumbers()">重置</button>
+                <div class="setup-item">
+                    <label>📄 列印模式</label>
+                    <select id="labelMode" onchange="generatePreview()">
+                        <option value="box">📦 外箱貼 (84.9x62.4mm)</option>
+                        <option value="spec">🏷️ 品規貼 (35x25mm)</option>
+                    </select>
+                </div>
+
+                <div class="setup-item">
+                    <label>🌙 快速設定原料月份</label>
+                    <select id="batchMonth" onchange="applyBatchMonth()">
+                        <option value="">選擇月份</option>
+                        <script>
+                            for (let i = 1; i <= 12; i++) {
+                                let m = i.toString().padStart(2, '0');
+                                document.write(`<option value="${m}">${m}月</option>`);
+                            }
+                        </script>
+                    </select>
+                </div>
+
+                <div class="setup-item">
+                    <label>操作功能</label>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn-paste" style="flex: 1;" onclick="pasteFromClipboard()">📋 貼上 Excel</button>
+                        <button class="btn-clear" onclick="clearNumbers()">重置</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="card" style="padding: 0; overflow: hidden;">
-        <table id="mainTable">
-            <thead>
-                <tr>
-                    <th width="180">製作品項</th>
-                    <th width="100">原料月份</th>
-                    <th>1kg 箱數<br><small>(3入/箱)</small></th>
-                    <th>300g 箱數<br><small>(10入/箱)</small></th>
-                    <th style="background-color: #f1f4f8; color: var(--neutral-accent);">自訂規格文字 與 數量</th>
-                    <th>樣品</th>
-                </tr>
-            </thead>
-            <tbody id="tableBody"></tbody>
-            <tfoot>
-                <tr class="custom-row">
-                    <td><input type="text" id="blankName" class="input-blank-name" placeholder="+ 手寫新增品項"></td>
-                    <td><select id="blankMonth" class="row-month" style="padding: 6px;"></select></td>
-                    <td><input type="number" id="blank1k" value="0" onfocus="this.select()"></td>
-                    <td><input type="number" id="blank300" value="0" onfocus="this.select()"></td>
-                    <td style="background-color: #f8f9fa;">
-                        <input type="text" id="blankSpecTxt" class="spec-input-text" placeholder="自訂規格">
-                        <input type="number" id="blankSpecQty" value="0" onfocus="this.select()">
-                    </td>
-                    <td><input type="number" id="blankSample" value="0" onfocus="this.select()"></td>
-                </tr>
-            </tfoot>
-        </table>
-        
-        <div class="action-bar no-print">
-            <button class="btn-preview" onclick="generatePreview()">✨ 產生標籤預覽</button>
-            <button class="btn-print" onclick="window.print()">🖨️ 確認列印標籤</button>
+        <div class="card" style="padding: 0; overflow: hidden;">
+            <table id="mainTable">
+                <thead>
+                    <tr>
+                        <th width="180">製作品項</th>
+                        <th width="100">原料月份</th>
+                        <th>1kg 箱數<br><small>(3入/箱)</small></th>
+                        <th>300g 箱數<br><small>(10入/箱)</small></th>
+                        <th style="background-color: #f1f4f8; color: var(--neutral-accent);">自訂規格文字 與 數量</th>
+                        <th>樣品</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+                <tfoot>
+                    <tr class="custom-row">
+                        <td><input type="text" id="blankName" class="input-blank-name" placeholder="+ 手寫新增品項"></td>
+                        <td><select id="blankMonth" class="row-month" style="padding: 6px;"></select></td>
+                        <td><input type="number" id="blank1k" value="0" onfocus="this.select()"></td>
+                        <td><input type="number" id="blank300" value="0" onfocus="this.select()"></td>
+                        <td style="background-color: #f8f9fa;">
+                            <input type="text" id="blankSpecTxt" class="spec-input-text" placeholder="自訂規格">
+                            <input type="number" id="blankSpecQty" value="0" onfocus="this.select()">
+                        </td>
+                        <td><input type="number" id="blankSample" value="0" onfocus="this.select()"></td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <div class="action-bar no-print">
+                <button class="btn-preview" onclick="generatePreview()">✨ 產生標籤預覽</button>
+                <button class="btn-print" onclick="window.print()">🖨️ 確認列印標籤</button>
+            </div>
         </div>
     </div>
-</div>
 
-<div id="toast" class="toast">數據已成功匯入！</div>
-<div id="printArea"></div>
+    <div id="toast" class="toast">數據已成功匯入！</div>
+    <div id="printArea"></div>
 
-<script>
-    document.getElementById('packDate').value = new Date().toISOString().split('T')[0];
-    
-    const products = [
-        "紅捲", "綠捲鬚", "紅橡", "綠橡", "紅火焰", "綠火焰", "紅蘿蔓", 
-        "奶油生菜", "羽衣甘藍", "歐芹", "巴西里", "紅包心生菜",
-        "紅甜脆", "綠甜脆", "綠水晶", "廣東生菜", "小番茄"
-    ];
-    
-    const displayNames = {
-        "紅甜脆": "紅甜脆生菜〔水耕〕",
-        "綠甜脆": "綠甜脆生菜〔水耕〕",
-        "綠水晶": "綠水晶生菜〔水耕〕"
-    };
+    <script>
+        document.getElementById('packDate').value = new Date().toISOString().split('T')[0];
 
-    const tbody = document.getElementById('tableBody');
-    const getMonthHTML = () => {
-        let h = `<option value="">--</option>`;
-        for(let i=1; i<=12; i++) h += `<option value="${i.toString().padStart(2,'0')}">${i}月</option>`;
-        return h;
-    };
+        const products = [
+            "紅捲", "綠捲鬚", "紅橡木", "綠橡木", "紅火焰", "綠火焰", "紅蘿蔓",
+            "奶油生菜", "羽衣甘藍", "歐芹", "紅包心",
+            "紅甜脆", "綠甜脆", "綠水晶", "廣A", ""
+        ];
 
-    products.forEach(key => {
-        const name = displayNames[key] || key;
-        tbody.innerHTML += `
+        const displayNames = {
+            "紅甜脆": "紅甜脆［水耕］",
+            "綠甜脆": "綠甜脆［水耕］",
+            "綠水晶": "綠水晶［水耕］"
+        };
+
+        const tbody = document.getElementById('tableBody');
+        const getMonthHTML = () => {
+            let h = `<option value="">--</option>`;
+            for (let i = 1; i <= 12; i++) h += `<option value="${i.toString().padStart(2, '0')}">${i}月</option>`;
+            return h;
+        };
+
+        products.forEach(key => {
+            const name = displayNames[key] || key;
+            tbody.innerHTML += `
             <tr data-name="${key}">
                 <td class="product-name">${name}</td>
                 <td><select class="row-month">${getMonthHTML()}</select></td>
@@ -441,174 +539,173 @@
                 <td><input type="number" class="qSample" value="0" onfocus="this.select()"></td>
             </tr>
         `;
-    });
-    document.getElementById('blankMonth').innerHTML = getMonthHTML();
+        });
+        document.getElementById('blankMonth').innerHTML = getMonthHTML();
 
-    async function pasteFromClipboard() {
-        try {
-            const text = await navigator.clipboard.readText();
-            if (!text) {
-                showToast("剪貼簿沒有內容，請先在 Excel 複製範圍");
-                return;
+        async function pasteFromClipboard() {
+            try {
+                const text = await navigator.clipboard.readText();
+                if (!text) {
+                    showToast("剪貼簿沒有內容，請先在 Excel 複製範圍");
+                    return;
+                }
+                processData(text);
+            } catch (err) {
+                const manualText = prompt("請貼上從 Excel 複製的數據內容：");
+                if (manualText) processData(manualText);
             }
-            processData(text);
-        } catch (err) {
-            const manualText = prompt("請貼上從 Excel 複製的數據內容：");
-            if (manualText) processData(manualText);
         }
-    }
 
-    function processData(text) {
-        const lines = text.trim().split(/\r?\n/);
-        let count = 0;
+        function processData(text) {
+            const lines = text.trim().split(/\r?\n/);
+            let count = 0;
 
-        lines.forEach(line => {
-            const parts = line.split(/[,\t]/);
-            if(parts.length < 2) return;
+            lines.forEach(line => {
+                const parts = line.split(/[,\t]/);
+                if (parts.length < 2) return;
 
-            const inputName = parts[0].trim();
-            if(inputName.includes("品項") || inputName.includes("1kg") || inputName.includes("製作")) return;
+                const inputName = parts[0].trim();
+                if (inputName.includes("品項") || inputName.includes("1kg") || inputName.includes("製作")) return;
 
-            const val1k = parseInt(parts[1]) || 0;
-            const val300 = parseInt(parts[2]) || 0;
-            const valCustom = parseInt(parts[3]) || 0;
+                const val1k = parseInt(parts[1]) || 0;
+                const val300 = parseInt(parts[2]) || 0;
+                const valCustom = parseInt(parts[3]) || 0;
 
-            let targetRow = null;
-            products.forEach(pKey => {
-                const cleanInput = inputName.replace(/生菜|［.*?］|\[.*?\]|〔.*?〕/g, "").replace(/木$/, "").trim();
-                const cleanKey = pKey.replace(/生菜|［.*?］|\[.*?\]|〔.*?〕/g, "").replace(/木$/, "").trim();
-                if(cleanInput === cleanKey || inputName.includes(pKey) || pKey.includes(cleanInput)) {
-                    targetRow = document.querySelector(`tr[data-name="${pKey}"]`);
+                let targetRow = null;
+                products.forEach(pKey => {
+                    const cleanInput = inputName.replace(/生菜|［.*?］|\[.*?\]/g, "");
+                    if (cleanInput === pKey || inputName.includes(pKey)) {
+                        targetRow = document.querySelector(`tr[data-name="${pKey}"]`);
+                    }
+                });
+
+                if (targetRow) {
+                    targetRow.querySelector('.q1k').value = val1k;
+                    targetRow.querySelector('.q300').value = val300;
+                    if (parts[3] !== undefined) targetRow.querySelector('.sQty').value = valCustom;
+
+                    targetRow.classList.add('row-updated');
+                    setTimeout(() => targetRow.classList.remove('row-updated'), 2000);
+                    count++;
+                } else if (inputName !== "") {
+                    document.getElementById('blankName').value = inputName;
+                    document.getElementById('blank1k').value = val1k;
+                    document.getElementById('blank300').value = val300;
+                    count++;
                 }
             });
 
-            if(targetRow) {
-                targetRow.querySelector('.q1k').value = val1k;
-                targetRow.querySelector('.q300').value = val300;
-                if (parts[3] !== undefined) targetRow.querySelector('.sQty').value = valCustom;
-                
-                targetRow.classList.add('row-updated');
-                setTimeout(() => targetRow.classList.remove('row-updated'), 2000);
-                count++;
-            } else if (inputName !== "") {
-                document.getElementById('blankName').value = inputName;
-                document.getElementById('blank1k').value = val1k;
-                document.getElementById('blank300').value = val300;
-                count++;
-            }
-        });
-
-        if(count > 0) {
-            showToast(`成功匯入 ${count} 列數據`);
-            generatePreview();
-        } else {
-            showToast("無法辨識數據，請確認 Excel 選取範圍");
-        }
-    }
-
-    function showToast(msg) {
-        const toast = document.getElementById('toast');
-        toast.innerText = msg;
-        toast.style.display = 'block';
-        setTimeout(() => toast.style.display = 'none', 3000);
-    }
-
-    function applyBatchMonth() {
-        const m = document.getElementById('batchMonth').value;
-        document.querySelectorAll('.row-month').forEach(s => s.value = m);
-    }
-
-    function clearNumbers() {
-        if(!confirm("確定要重置所有內容嗎？")) return;
-        document.querySelectorAll('input[type="number"]').forEach(i => i.value = 0);
-        document.querySelectorAll('input[type="text"]').forEach(i => i.value = "");
-        document.querySelectorAll('.row-month').forEach(s => s.selectedIndex = 0);
-        document.getElementById('batchMonth').selectedIndex = 0;
-        document.getElementById('printArea').innerHTML = "";
-        showToast("已重置所有內容(含月份)");
-    }
-
-    function generatePreview() {
-        const mode = document.getElementById('labelMode').value;
-        const pDate = document.getElementById('packDate').value.split('-').slice(1).join('/');
-        const printArea = document.getElementById('printArea');
-        printArea.innerHTML = "";
-
-        document.querySelectorAll('#tableBody tr').forEach(row => {
-            const name = row.querySelector('.product-name').innerText;
-            const mVal = row.querySelector('.row-month').value;
-            const sMonth = mVal ? mVal : "　";
-            
-            const q1 = parseInt(row.querySelector('.q1k').value) || 0;
-            const q3 = parseInt(row.querySelector('.q300').value) || 0;
-            const customTxt = row.querySelector('.sText').value || "自訂規格";
-            const customQty = parseInt(row.querySelector('.sQty').value) || 0;
-            const qS = parseInt(row.querySelector('.qSample').value) || 0;
-
-            renderLabels(printArea, mode, name, q1, q3, customTxt, customQty, qS, sMonth, pDate);
-        });
-
-        const bName = document.getElementById('blankName').value;
-        if(bName) {
-            const bmVal = document.getElementById('blankMonth').value;
-            const bsMonth = bmVal ? bmVal : "　";
-            
-            const bq1 = parseInt(document.getElementById('blank1k').value) || 0;
-            const bq3 = parseInt(document.getElementById('blank300').value) || 0;
-            const bTxt = document.getElementById('blankSpecTxt').value || "自訂規格";
-            const bQty = parseInt(document.getElementById('blankSpecQty').value) || 0;
-            const bqS = parseInt(document.getElementById('blankSample').value) || 0;
-            renderLabels(printArea, mode, bName, bq1, bq3, bTxt, bQty, bqS, bsMonth, pDate);
-        }
-        
-        printArea.scrollIntoView({ behavior: 'smooth' });
-    }
-
-    function renderLabels(area, mode, name, q1, q3, cTxt, cQty, qS, m, d) {
-        if(mode === 'spec') {
-            for(let i=0; i<q1; i++) area.innerHTML += createSpec(name, "1K");
-            for(let i=0; i<q3; i++) area.innerHTML += createSpec(name, "300g");
-            for(let i=0; i<cQty; i++) area.innerHTML += createSpec(name, cTxt);
-            for(let i=0; i<qS; i++) area.innerHTML += createSpec(name, "樣品");
-        } else {
-            addBoxLabels(area, name, q1, 3, "1KG", m, d);
-            addBoxLabels(area, name, q3, 10, "300G", m, d);
-            if(cQty > 0) {
-                for(let i=0; i<cQty; i++) area.innerHTML += createBox(name, cTxt, m, d);
-            }
-            if(qS > 0) {
-                for(let i=0; i<qS; i++) area.innerHTML += createBox(name, "樣品", m, d);
+            if (count > 0) {
+                showToast(`成功匯入 ${count} 列數據`);
+                generatePreview();
+            } else {
+                showToast("無法辨識數據，請確認 Excel 選取範圍");
             }
         }
-    }
 
-    function addBoxLabels(area, name, total, perBox, unit, m, d) {
-        if(total <= 0) return;
-        const full = Math.floor(total / perBox);
-        const rem = total % perBox;
-        for(let i=0; i<full; i++) area.innerHTML += createBox(name, `${unit}*${perBox}包`, m, d);
-        if(rem > 0) area.innerHTML += createBox(name, `${unit}*${rem}包`, m, d);
-    }
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.style.display = 'block';
+            setTimeout(() => toast.style.display = 'none', 3000);
+        }
 
-    function getFontSizeForWidth(text, maxWidth, baseSize, bold = true) {
-        const canvas = document.createElement('canvas');
-        const context = canvas.getContext('2d');
-        let size = baseSize;
-        const adjustedMaxWidth = maxWidth - 2; 
-        context.font = `${bold ? '900' : 'bold'} ${size}pt "Microsoft JhengHei"`;
-        
-        while (context.measureText(text).width > adjustedMaxWidth && size > 5) {
-            size -= 0.5;
+        function applyBatchMonth() {
+            const m = document.getElementById('batchMonth').value;
+            document.querySelectorAll('.row-month').forEach(s => s.value = m);
+        }
+
+        function clearNumbers() {
+            if (!confirm("確定要重置所有內容嗎？")) return;
+            document.querySelectorAll('input[type="number"]').forEach(i => i.value = 0);
+            document.querySelectorAll('input[type="text"]').forEach(i => i.value = "");
+            document.querySelectorAll('.row-month').forEach(s => s.selectedIndex = 0);
+            document.getElementById('batchMonth').selectedIndex = 0;
+            document.getElementById('printArea').innerHTML = "";
+            showToast("已重置所有內容(含月份)");
+        }
+
+        function generatePreview() {
+            const mode = document.getElementById('labelMode').value;
+            const pDate = document.getElementById('packDate').value.split('-').slice(1).join('/');
+            const printArea = document.getElementById('printArea');
+            printArea.innerHTML = "";
+
+            document.querySelectorAll('#tableBody tr').forEach(row => {
+                const name = row.querySelector('.product-name').innerText;
+                const mVal = row.querySelector('.row-month').value;
+                const sMonth = mVal ? mVal : "　";
+
+                const q1 = parseInt(row.querySelector('.q1k').value) || 0;
+                const q3 = parseInt(row.querySelector('.q300').value) || 0;
+                const customTxt = row.querySelector('.sText').value || "自訂規格";
+                const customQty = parseInt(row.querySelector('.sQty').value) || 0;
+                const qS = parseInt(row.querySelector('.qSample').value) || 0;
+
+                renderLabels(printArea, mode, name, q1, q3, customTxt, customQty, qS, sMonth, pDate);
+            });
+
+            const bName = document.getElementById('blankName').value;
+            if (bName) {
+                const bmVal = document.getElementById('blankMonth').value;
+                const bsMonth = bmVal ? bmVal : "　";
+
+                const bq1 = parseInt(document.getElementById('blank1k').value) || 0;
+                const bq3 = parseInt(document.getElementById('blank300').value) || 0;
+                const bTxt = document.getElementById('blankSpecTxt').value || "自訂規格";
+                const bQty = parseInt(document.getElementById('blankSpecQty').value) || 0;
+                const bqS = parseInt(document.getElementById('blankSample').value) || 0;
+                renderLabels(printArea, mode, bName, bq1, bq3, bTxt, bQty, bqS, bsMonth, pDate);
+            }
+
+            printArea.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function renderLabels(area, mode, name, q1, q3, cTxt, cQty, qS, m, d) {
+            if (mode === 'spec') {
+                for (let i = 0; i < q1; i++) area.innerHTML += createSpec(name, "1K");
+                for (let i = 0; i < q3; i++) area.innerHTML += createSpec(name, "300g");
+                for (let i = 0; i < cQty; i++) area.innerHTML += createSpec(name, cTxt);
+                for (let i = 0; i < qS; i++) area.innerHTML += createSpec(name, "樣品");
+            } else {
+                addBoxLabels(area, name, q1, 3, "1KG", m, d);
+                addBoxLabels(area, name, q3, 10, "300G", m, d);
+                if (cQty > 0) {
+                    for (let i = 0; i < cQty; i++) area.innerHTML += createBox(name, cTxt, m, d);
+                }
+                if (qS > 0) {
+                    for (let i = 0; i < qS; i++) area.innerHTML += createBox(name, "樣品", m, d);
+                }
+            }
+        }
+
+        function addBoxLabels(area, name, total, perBox, unit, m, d) {
+            if (total <= 0) return;
+            const full = Math.floor(total / perBox);
+            const rem = total % perBox;
+            for (let i = 0; i < full; i++) area.innerHTML += createBox(name, `${unit}*${perBox}包`, m, d);
+            if (rem > 0) area.innerHTML += createBox(name, `${unit}*${rem}包`, m, d);
+        }
+
+        function getFontSizeForWidth(text, maxWidth, baseSize, bold = true) {
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            let size = baseSize;
+            const adjustedMaxWidth = maxWidth - 2;
             context.font = `${bold ? '900' : 'bold'} ${size}pt "Microsoft JhengHei"`;
-        }
-        return `${size}pt`;
-    }
 
-    function createBox(n, s, m, d) {
-        const specFontSize = getFontSizeForWidth(s, 240, 36); 
-        const nameFontSize = getFontSizeForWidth(n, 220, 32);
-        
-        return `<div class="label-page box-size box-label">
+            while (context.measureText(text).width > adjustedMaxWidth && size > 5) {
+                size -= 0.5;
+                context.font = `${bold ? '900' : 'bold'} ${size}pt "Microsoft JhengHei"`;
+            }
+            return `${size}pt`;
+        }
+
+        function createBox(n, s, m, d) {
+            const specFontSize = getFontSizeForWidth(s, 240, 36);
+            const nameFontSize = getFontSizeForWidth(n, 220, 32);
+
+            return `<div class="label-page box-size box-label">
             <div class="top-row">
                 <div class="date-area">
                     原料日期：${m}  / <br>
@@ -626,35 +723,36 @@
                 </div>
             </div>
         </div>`;
-    }
-
-    // --- 品規格式優化 (不溢出/不重疊) ---
-    function createSpec(n, s) {
-        let displayName = n;
-        // 1. 品名分行處理
-        if (n.includes("［")) {
-            displayName = n.replace("［", "<br>［");
-        } else if (n.length > 5) {
-            const mid = Math.ceil(n.length / 2);
-            displayName = n.substring(0, mid) + "<br>" + n.substring(mid);
         }
-        
-        const lines = displayName.split("<br>");
-        const longestLine = lines.reduce((a, b) => a.length > b.length ? a : b);
-        
-        // 2. 品名縮放 (空間限制更嚴格)
-        const nameFontSize = getFontSizeForWidth(longestLine, 120, 18);
-        
-        // 3. 規格縮放 (確保 nowrap 且字級在安全範圍內)
-        // 寬度限制設為 128px (35mm扣除內距)，基準縮小5% (20.9)，確保絕對不溢出
-        const specBigFontSize = getFontSizeForWidth(s, 128, 20.9);
 
-        return `<div class="label-page spec-size spec-label">
+        // --- 品規格式優化 (不溢出/不重疊) ---
+        function createSpec(n, s) {
+            let displayName = n;
+            // 1. 品名分行處理
+            if (n.includes("［")) {
+                displayName = n.replace("［", "<br>［");
+            } else if (n.length > 5) {
+                const mid = Math.ceil(n.length / 2);
+                displayName = n.substring(0, mid) + "<br>" + n.substring(mid);
+            }
+
+            const lines = displayName.split("<br>");
+            const longestLine = lines.reduce((a, b) => a.length > b.length ? a : b);
+
+            // 2. 品名縮放 (空間限制更嚴格)
+            const nameFontSize = getFontSizeForWidth(longestLine, 120, 18);
+
+            // 3. 規格縮放 (確保 nowrap 且字級在安全範圍內)
+            // 寬度限制設為 128px (35mm扣除內距)，基準縮小5% (20.9)，確保絕對不溢出
+            const specBigFontSize = getFontSizeForWidth(s, 128, 20.9);
+
+            return `<div class="label-page spec-size spec-label">
             <div class="name-top" style="font-size: ${nameFontSize}">${displayName}</div>
             <div class="spec-big" style="font-size: ${specBigFontSize}"><span>${s}</span></div>
         </div>`;
-    }
-</script>
+        }
+    </script>
 
 </body>
+
 </html>
