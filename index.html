@@ -508,7 +508,7 @@
         const products = [
             "紅捲", "綠捲鬚", "紅橡木", "綠橡木", "紅火焰", "綠火焰", "紅蘿蔓",
             "奶油生菜", "羽衣甘藍", "歐芹", "巴西里", "紅包心",
-            "紅甜脆", "綠甜脆", "綠水晶", "廣A", ""
+            "紅甜脆", "綠甜脆", "綠水晶", "廣A"
         ];
 
         const displayNames = {
@@ -523,16 +523,16 @@
             if (!pKey) return false;
             const cleanInput = inputName.replace(/生菜|［.*?］|\[.*?\]/g, "").trim();
             const cleanKey = pKey.replace(/生菜|［.*?］|\[.*?\]/g, "").trim();
-            
+
             const aliases = {
                 "廣A": ["廣東", "廣東生菜", "廣東A菜", "廣A"],
                 "奶油生菜": ["波士頓奶油", "奶油生菜", "波士頓奶油生菜"],
                 "歐芹": ["歐芹", "平葉巴西里", "義大利巴西里"],
                 "巴西里": ["巴西里", "捲葉巴西里"]
             };
-            
+
             if (cleanInput === cleanKey) return true;
-            
+
             if (aliases[pKey]) {
                 for (const alias of aliases[pKey]) {
                     const cleanAlias = alias.replace(/生菜|［.*?］|\[.*?\]/g, "").trim();
@@ -543,7 +543,7 @@
                     }
                 }
             }
-            
+
             if (cleanKey.length >= 2 && cleanInput.includes(cleanKey)) {
                 if (pKey === "巴西里" && (inputName.includes("歐芹") || inputName.includes("平葉"))) return false;
                 return true;
