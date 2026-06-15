@@ -472,6 +472,7 @@
                         <th width="100">原料月份</th>
                         <th>1kg 箱數<br><small>(3入/箱)</small></th>
                         <th>300g 箱數<br><small>(10入/箱)</small></th>
+                        <th>5KG/件</th>
                         <th style="background-color: #f1f4f8; color: var(--neutral-accent);">自訂規格文字 與 數量</th>
                         <th>樣品</th>
                     </tr>
@@ -483,6 +484,7 @@
                         <td><select id="blankMonth" class="row-month" style="padding: 6px;"></select></td>
                         <td><input type="number" id="blank1k" value="0" onfocus="this.select()"></td>
                         <td><input type="number" id="blank300" value="0" onfocus="this.select()"></td>
+                        <td></td>
                         <td style="background-color: #f8f9fa;">
                             <input type="text" id="blankSpecTxt" class="spec-input-text" placeholder="自訂規格">
                             <input type="number" id="blankSpecQty" value="0" onfocus="this.select()">
@@ -507,7 +509,7 @@
 
         const products = [
             "紅捲", "綠捲鬚", "紅橡木", "綠橡木", "紅火焰", "綠火焰", "紅蘿蔓",
-            "奶油生菜", "羽衣甘藍", "歐芹", "巴西里", "紅包心",
+            "奶油生菜", "羽衣甘藍", "巴西里［平葉］", "巴西里［捲葉］", "紅包心",
             "紅甜脆", "綠甜脆", "綠水晶", "廣A"
         ];
 
@@ -515,20 +517,24 @@
             "紅甜脆": "紅甜脆［水耕］",
             "綠甜脆": "綠甜脆［水耕］",
             "綠水晶": "綠水晶［水耕］",
-            "歐芹": "歐芹［平葉巴西里］",
             "廣A": "廣東生菜"
         };
 
         function isProductMatch(inputName, pKey) {
             if (!pKey) return false;
+            
+            // 優先排除平葉與捲葉巴西里互相誤判的狀況
+            if (pKey === "巴西里［捲葉］" && (inputName.includes("歐芹") || inputName.includes("平葉"))) return false;
+            if (pKey === "巴西里［平葉］" && (inputName === "巴西里" || inputName.includes("捲葉"))) return false;
+
             const cleanInput = inputName.replace(/生菜|［.*?］|\[.*?\]/g, "").trim();
             const cleanKey = pKey.replace(/生菜|［.*?］|\[.*?\]/g, "").trim();
 
             const aliases = {
                 "廣A": ["廣東", "廣東生菜", "廣東A菜", "廣A"],
                 "奶油生菜": ["波士頓奶油", "奶油生菜", "波士頓奶油生菜"],
-                "歐芹": ["歐芹", "平葉巴西里", "義大利巴西里"],
-                "巴西里": ["巴西里", "捲葉巴西里"]
+                "巴西里［平葉］": ["歐芹", "平葉巴西里", "義大利巴西里", "巴西里［平葉］"],
+                "巴西里［捲葉］": ["巴西里", "捲葉巴西里", "巴西里［捲葉］"]
             };
 
             if (cleanInput === cleanKey) return true;
@@ -537,15 +543,12 @@
                 for (const alias of aliases[pKey]) {
                     const cleanAlias = alias.replace(/生菜|［.*?］|\[.*?\]/g, "").trim();
                     if (cleanInput === cleanAlias || cleanInput.includes(cleanAlias) || cleanAlias.includes(cleanInput)) {
-                        if (pKey === "巴西里" && (inputName.includes("歐芹") || inputName.includes("平葉"))) return false;
-                        if (pKey === "歐芹" && inputName === "巴西里") return false;
                         return true;
                     }
                 }
             }
 
             if (cleanKey.length >= 2 && cleanInput.includes(cleanKey)) {
-                if (pKey === "巴西里" && (inputName.includes("歐芹") || inputName.includes("平葉"))) return false;
                 return true;
             }
             return false;
@@ -560,12 +563,14 @@
 
         products.forEach(key => {
             const name = displayNames[key] || key;
+            const isButterLettuce = key === "奶油生菜";
             tbody.innerHTML += `
             <tr data-name="${key}">
                 <td class="product-name">${name}</td>
                 <td><select class="row-month">${getMonthHTML()}</select></td>
                 <td><input type="number" class="q1k" value="0" onfocus="this.select()"></td>
                 <td><input type="number" class="q300" value="0" onfocus="this.select()"></td>
+                <td>${isButterLettuce ? `<input type="number" class="q5k" value="0" onfocus="this.select()">` : ''}</td>
                 <td style="background-color: #f8f9fa;">
                     <input type="text" class="sText" class="spec-input-text" placeholder="輸入規格">
                     <input type="number" class="sQty" value="0" onfocus="this.select()">
@@ -594,16 +599,75 @@
             const lines = text.trim().split(/\r?\n/);
             let count = 0;
 
-            lines.forEach(line => {
+            let colMap = {
+                name: 0,
+                q1k: 1,
+                q300: 2,
+                q5k: -1,
+                custom: {}
+            };
+
+            let hasHeader = false;
+            if (lines.length > 0) {
+                const firstParts = lines[0].split(/[,\t]/).map(s => s.trim());
+                if (firstParts[0].includes("品項") || firstParts[0].includes("品") || firstParts.some(p => p.includes("kg") || p.includes("g") || p.includes("箱") || p.includes("包"))) {
+                    hasHeader = true;
+                    colMap = {
+                        name: 0,
+                        q1k: -1,
+                        q300: -1,
+                        q5k: -1,
+                        custom: {}
+                    };
+                    firstParts.forEach((part, idx) => {
+                        const cleanPart = part.toLowerCase();
+                        if (cleanPart.includes("品項") || cleanPart.includes("品名") || idx === 0) {
+                            colMap.name = idx;
+                        } else if (cleanPart.includes("1kg") || cleanPart.includes("1k")) {
+                            colMap.q1k = idx;
+                        } else if (cleanPart.includes("300g") || cleanPart.includes("300")) {
+                            colMap.q300 = idx;
+                        } else if (cleanPart.includes("5kg") || cleanPart.includes("5k")) {
+                            colMap.q5k = idx;
+                        } else {
+                            let specName = part.replace(/\/包|\/袋|\/箱|［.*?］|\[.*?\]/g, "").trim();
+                            colMap.custom[idx] = specName;
+                        }
+                    });
+                } else {
+                    colMap = {
+                        name: 0,
+                        q1k: 1,
+                        q300: 2,
+                        q5k: 4,
+                        custom: { 3: "600g" }
+                    };
+                }
+            }
+
+            lines.forEach((line, lineIdx) => {
+                if (lineIdx === 0 && hasHeader) return;
+
                 const parts = line.split(/[,\t]/);
                 if (parts.length < 2) return;
 
-                const inputName = parts[0].trim();
-                if (inputName.includes("品項") || inputName.includes("1kg") || inputName.includes("製作")) return;
+                const inputName = parts[colMap.name] ? parts[colMap.name].trim() : "";
+                if (!inputName || inputName.includes("品項") || inputName.includes("1kg") || inputName.includes("製作")) return;
 
-                const val1k = parseInt(parts[1]) || 0;
-                const val300 = parseInt(parts[2]) || 0;
-                const valCustom = parseInt(parts[3]) || 0;
+                let val1k = (colMap.q1k !== -1 && parts[colMap.q1k]) ? (parseInt(parts[colMap.q1k]) || 0) : 0;
+                let val300 = (colMap.q300 !== -1 && parts[colMap.q300]) ? (parseInt(parts[colMap.q300]) || 0) : 0;
+                let val5k = (colMap.q5k !== -1 && parts[colMap.q5k]) ? (parseInt(parts[colMap.q5k]) || 0) : 0;
+
+                let customSpecs = [];
+                for (let idx in colMap.custom) {
+                    let qty = parseInt(parts[idx]) || 0;
+                    if (qty > 0) {
+                        customSpecs.push({
+                            text: colMap.custom[idx],
+                            qty: qty
+                        });
+                    }
+                }
 
                 let targetRow = null;
                 products.forEach(pKey => {
@@ -615,7 +679,19 @@
                 if (targetRow) {
                     targetRow.querySelector('.q1k').value = val1k;
                     targetRow.querySelector('.q300').value = val300;
-                    if (parts[3] !== undefined) targetRow.querySelector('.sQty').value = valCustom;
+                    
+                    const q5kInput = targetRow.querySelector('.q5k');
+                    if (q5kInput) {
+                        q5kInput.value = val5k;
+                    }
+
+                    if (customSpecs.length > 0) {
+                        targetRow.querySelector('.sText').value = customSpecs[0].text;
+                        targetRow.querySelector('.sQty').value = customSpecs[0].qty;
+                    } else {
+                        targetRow.querySelector('.sText').value = "";
+                        targetRow.querySelector('.sQty').value = 0;
+                    }
 
                     targetRow.classList.add('row-updated');
                     setTimeout(() => targetRow.classList.remove('row-updated'), 2000);
@@ -624,6 +700,13 @@
                     document.getElementById('blankName').value = inputName;
                     document.getElementById('blank1k').value = val1k;
                     document.getElementById('blank300').value = val300;
+                    if (customSpecs.length > 0) {
+                        document.getElementById('blankSpecTxt').value = customSpecs[0].text;
+                        document.getElementById('blankSpecQty').value = customSpecs[0].qty;
+                    } else {
+                        document.getElementById('blankSpecTxt').value = "";
+                        document.getElementById('blankSpecQty').value = 0;
+                    }
                     count++;
                 }
             });
@@ -671,11 +754,15 @@
 
                 const q1 = parseInt(row.querySelector('.q1k').value) || 0;
                 const q3 = parseInt(row.querySelector('.q300').value) || 0;
+
+                const q5Input = row.querySelector('.q5k');
+                const q5 = q5Input ? (parseInt(q5Input.value) || 0) : 0;
+
                 const customTxt = row.querySelector('.sText').value || "自訂規格";
                 const customQty = parseInt(row.querySelector('.sQty').value) || 0;
                 const qS = parseInt(row.querySelector('.qSample').value) || 0;
 
-                renderLabels(printArea, mode, name, q1, q3, customTxt, customQty, qS, sMonth, pDate);
+                renderLabels(printArea, mode, name, q1, q3, q5, customTxt, customQty, qS, sMonth, pDate);
             });
 
             const bName = document.getElementById('blankName').value;
@@ -688,21 +775,23 @@
                 const bTxt = document.getElementById('blankSpecTxt').value || "自訂規格";
                 const bQty = parseInt(document.getElementById('blankSpecQty').value) || 0;
                 const bqS = parseInt(document.getElementById('blankSample').value) || 0;
-                renderLabels(printArea, mode, bName, bq1, bq3, bTxt, bQty, bqS, bsMonth, pDate);
+                renderLabels(printArea, mode, bName, bq1, bq3, 0, bTxt, bQty, bqS, bsMonth, pDate);
             }
 
             printArea.scrollIntoView({ behavior: 'smooth' });
         }
 
-        function renderLabels(area, mode, name, q1, q3, cTxt, cQty, qS, m, d) {
+        function renderLabels(area, mode, name, q1, q3, q5, cTxt, cQty, qS, m, d) {
             if (mode === 'spec') {
                 for (let i = 0; i < q1; i++) area.innerHTML += createSpec(name, "1K");
                 for (let i = 0; i < q3; i++) area.innerHTML += createSpec(name, "300g");
+                for (let i = 0; i < q5; i++) area.innerHTML += createSpec(name, "5KG/件");
                 for (let i = 0; i < cQty; i++) area.innerHTML += createSpec(name, cTxt);
                 for (let i = 0; i < qS; i++) area.innerHTML += createSpec(name, "樣品");
             } else {
                 addBoxLabels(area, name, q1, 3, "1KG", m, d);
                 addBoxLabels(area, name, q3, 10, "300G", m, d);
+                for (let i = 0; i < q5; i++) area.innerHTML += createBox(name, "5KG/件", m, d);
                 if (cQty > 0) {
                     for (let i = 0; i < cQty; i++) area.innerHTML += createBox(name, cTxt, m, d);
                 }
