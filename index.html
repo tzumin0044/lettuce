@@ -145,12 +145,24 @@
             border-radius: 6px;
             text-align: center;
             font-weight: 600;
-            color: var(--primary-accent);
-            transition: border-color 0.2s;
+            color: #95a5a6;
+            background-color: #fafbfc;
+            transition: all 0.25s ease;
+        }
+
+        input[type="number"].has-value {
+            background-color: #e8f8f5;
+            color: #117a65;
+            border-color: #2ecc71;
+            font-weight: 700;
+            box-shadow: 0 0 4px rgba(46, 204, 113, 0.2);
         }
 
         input[type="number"]:focus {
             border-color: var(--primary-accent);
+            background-color: #fff;
+            color: var(--text-main);
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
             outline: none;
         }
 
@@ -522,7 +534,7 @@
 
         function isProductMatch(inputName, pKey) {
             if (!pKey) return false;
-            
+
             // 優先排除平葉與捲葉巴西里互相誤判的狀況
             if (pKey === "巴西里［捲葉］" && (inputName.includes("歐芹") || inputName.includes("平葉"))) return false;
             if (pKey === "巴西里［平葉］" && (inputName === "巴西里" || inputName.includes("捲葉"))) return false;
@@ -572,7 +584,7 @@
                 <td><input type="number" class="q300" value="0" onfocus="this.select()"></td>
                 <td>${isButterLettuce ? `<input type="number" class="q5k" value="0" onfocus="this.select()">` : ''}</td>
                 <td style="background-color: #f8f9fa;">
-                    <input type="text" class="sText" class="spec-input-text" placeholder="輸入規格">
+                    <input type="text" class="sText spec-input-text" placeholder="輸入規格">
                     <input type="number" class="sQty" value="0" onfocus="this.select()">
                 </td>
                 <td><input type="number" class="qSample" value="0" onfocus="this.select()"></td>
@@ -580,6 +592,32 @@
         `;
         });
         document.getElementById('blankMonth').innerHTML = getMonthHTML();
+
+        function updateInputStyle(input) {
+            if (!input || input.type !== 'number') return;
+            const val = parseFloat(input.value) || 0;
+            if (val > 0) {
+                input.classList.add('has-value');
+            } else {
+                input.classList.remove('has-value');
+            }
+        }
+
+        function updateAllInputStyles() {
+            document.querySelectorAll('input[type="number"]').forEach(input => {
+                updateInputStyle(input);
+            });
+        }
+
+        // 監聽表格內所有輸入框的輸入事件
+        document.getElementById('mainTable').addEventListener('input', function(e) {
+            if (e.target.tagName === 'INPUT' && e.target.type === 'number') {
+                updateInputStyle(e.target);
+            }
+        });
+
+        // 初始化所有輸入框樣式
+        updateAllInputStyles();
 
         async function pasteFromClipboard() {
             try {
@@ -679,7 +717,7 @@
                 if (targetRow) {
                     targetRow.querySelector('.q1k').value = val1k;
                     targetRow.querySelector('.q300').value = val300;
-                    
+
                     const q5kInput = targetRow.querySelector('.q5k');
                     if (q5kInput) {
                         q5kInput.value = val5k;
@@ -712,6 +750,7 @@
             });
 
             if (count > 0) {
+                updateAllInputStyles();
                 showToast(`成功匯入 ${count} 列數據`);
                 generatePreview();
             } else {
@@ -738,6 +777,7 @@
             document.querySelectorAll('.row-month').forEach(s => s.selectedIndex = 0);
             document.getElementById('batchMonth').selectedIndex = 0;
             document.getElementById('printArea').innerHTML = "";
+            updateAllInputStyles();
             showToast("已重置所有內容(含月份)");
         }
 
@@ -873,6 +913,9 @@
             <div class="spec-big" style="font-size: ${specBigFontSize}"><span>${s}</span></div>
         </div>`;
         }
+
+        // 監聽列印前事件，當使用者按 Ctrl+P 或觸發列印時，自動重新產生最新資料的預覽
+        window.addEventListener('beforeprint', generatePreview);
     </script>
 
 </body>
