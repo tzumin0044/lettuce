@@ -610,7 +610,7 @@
         }
 
         // 監聽表格內所有輸入框的輸入事件
-        document.getElementById('mainTable').addEventListener('input', function(e) {
+        document.getElementById('mainTable').addEventListener('input', function (e) {
             if (e.target.tagName === 'INPUT' && e.target.type === 'number') {
                 updateInputStyle(e.target);
             }
