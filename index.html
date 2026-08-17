@@ -384,7 +384,19 @@
             padding: 0;
             text-align: center;
             justify-content: flex-start;
+            position: relative;
             /* 改為靠上排列，透過高度控制 */
+        }
+
+        .spec-label .trim-mark {
+            position: absolute;
+            bottom: 0.5mm;
+            right: 1.5mm;
+            font-size: 16pt;
+            font-weight: 900;
+            line-height: 1;
+            color: black;
+            pointer-events: none;
         }
 
         .spec-label .name-top {
@@ -480,8 +492,9 @@
             <table id="mainTable">
                 <thead>
                     <tr>
-                        <th width="180">製作品項</th>
-                        <th width="100">原料月份</th>
+                        <th width="160">製作品項</th>
+                        <th width="70">整理<br><input type="checkbox" id="selectAllTrim" onchange="toggleSelectAllTrim(this)" style="cursor: pointer; transform: scale(1.1); margin-top: 3px;" title="全選/取消全選整理"></th>
+                        <th width="90">原料月份</th>
                         <th>1kg 箱數<br><small>(3入/箱)</small></th>
                         <th>300g 箱數<br><small>(10入/箱)</small></th>
                         <th>5KG/件</th>
@@ -493,6 +506,7 @@
                 <tfoot>
                     <tr class="custom-row">
                         <td><input type="text" id="blankName" class="input-blank-name" placeholder="+ 手寫新增品項"></td>
+                        <td><input type="checkbox" id="blankTrim" class="chk-trim" style="cursor: pointer; transform: scale(1.2);"></td>
                         <td><select id="blankMonth" class="row-month" style="padding: 6px;"></select></td>
                         <td><input type="number" id="blank1k" value="0" onfocus="this.select()"></td>
                         <td><input type="number" id="blank300" value="0" onfocus="this.select()"></td>
@@ -579,6 +593,7 @@
             tbody.innerHTML += `
             <tr data-name="${key}">
                 <td class="product-name">${name}</td>
+                <td><input type="checkbox" class="chk-trim" style="cursor: pointer; transform: scale(1.2);"></td>
                 <td><select class="row-month">${getMonthHTML()}</select></td>
                 <td><input type="number" class="q1k" value="0" onfocus="this.select()"></td>
                 <td><input type="number" class="q300" value="0" onfocus="this.select()"></td>
@@ -592,6 +607,11 @@
         `;
         });
         document.getElementById('blankMonth').innerHTML = getMonthHTML();
+
+        function toggleSelectAllTrim(master) {
+            const checked = master.checked;
+            document.querySelectorAll('.chk-trim').forEach(chk => chk.checked = checked);
+        }
 
         function updateInputStyle(input) {
             if (!input || input.type !== 'number') return;
@@ -775,10 +795,13 @@
             document.querySelectorAll('input[type="number"]').forEach(i => i.value = 0);
             document.querySelectorAll('input[type="text"]').forEach(i => i.value = "");
             document.querySelectorAll('.row-month').forEach(s => s.selectedIndex = 0);
+            document.querySelectorAll('.chk-trim').forEach(chk => chk.checked = false);
+            const selectAll = document.getElementById('selectAllTrim');
+            if (selectAll) selectAll.checked = false;
             document.getElementById('batchMonth').selectedIndex = 0;
             document.getElementById('printArea').innerHTML = "";
             updateAllInputStyles();
-            showToast("已重置所有內容(含月份)");
+            showToast("已重置所有內容(含整理設定)");
         }
 
         function generatePreview() {
@@ -791,6 +814,7 @@
                 const name = row.querySelector('.product-name').innerText;
                 const mVal = row.querySelector('.row-month').value;
                 const sMonth = mVal ? mVal : "　";
+                const isTrimmed = row.querySelector('.chk-trim') ? row.querySelector('.chk-trim').checked : false;
 
                 const q1 = parseInt(row.querySelector('.q1k').value) || 0;
                 const q3 = parseInt(row.querySelector('.q300').value) || 0;
@@ -802,32 +826,33 @@
                 const customQty = parseInt(row.querySelector('.sQty').value) || 0;
                 const qS = parseInt(row.querySelector('.qSample').value) || 0;
 
-                renderLabels(printArea, mode, name, q1, q3, q5, customTxt, customQty, qS, sMonth, pDate);
+                renderLabels(printArea, mode, name, q1, q3, q5, customTxt, customQty, qS, sMonth, pDate, isTrimmed);
             });
 
             const bName = document.getElementById('blankName').value;
             if (bName) {
                 const bmVal = document.getElementById('blankMonth').value;
                 const bsMonth = bmVal ? bmVal : "　";
+                const bTrimmed = document.getElementById('blankTrim') ? document.getElementById('blankTrim').checked : false;
 
                 const bq1 = parseInt(document.getElementById('blank1k').value) || 0;
                 const bq3 = parseInt(document.getElementById('blank300').value) || 0;
                 const bTxt = document.getElementById('blankSpecTxt').value || "自訂規格";
                 const bQty = parseInt(document.getElementById('blankSpecQty').value) || 0;
                 const bqS = parseInt(document.getElementById('blankSample').value) || 0;
-                renderLabels(printArea, mode, bName, bq1, bq3, 0, bTxt, bQty, bqS, bsMonth, pDate);
+                renderLabels(printArea, mode, bName, bq1, bq3, 0, bTxt, bQty, bqS, bsMonth, pDate, bTrimmed);
             }
 
             printArea.scrollIntoView({ behavior: 'smooth' });
         }
 
-        function renderLabels(area, mode, name, q1, q3, q5, cTxt, cQty, qS, m, d) {
+        function renderLabels(area, mode, name, q1, q3, q5, cTxt, cQty, qS, m, d, isTrimmed = false) {
             if (mode === 'spec') {
-                for (let i = 0; i < q1; i++) area.innerHTML += createSpec(name, "1K");
-                for (let i = 0; i < q3; i++) area.innerHTML += createSpec(name, "300g");
-                for (let i = 0; i < q5; i++) area.innerHTML += createSpec(name, "5KG/件");
-                for (let i = 0; i < cQty; i++) area.innerHTML += createSpec(name, cTxt);
-                for (let i = 0; i < qS; i++) area.innerHTML += createSpec(name, "樣品");
+                for (let i = 0; i < q1; i++) area.innerHTML += createSpec(name, "1K", isTrimmed);
+                for (let i = 0; i < q3; i++) area.innerHTML += createSpec(name, "300g", isTrimmed);
+                for (let i = 0; i < q5; i++) area.innerHTML += createSpec(name, "5KG/件", isTrimmed);
+                for (let i = 0; i < cQty; i++) area.innerHTML += createSpec(name, cTxt, isTrimmed);
+                for (let i = 0; i < qS; i++) area.innerHTML += createSpec(name, "樣品", isTrimmed);
             } else {
                 addBoxLabels(area, name, q1, 3, "1KG", m, d);
                 addBoxLabels(area, name, q3, 10, "300G", m, d);
@@ -888,7 +913,7 @@
         }
 
         // --- 品規格式優化 (不溢出/不重疊) ---
-        function createSpec(n, s) {
+        function createSpec(n, s, isTrimmed = false) {
             let displayName = n;
             // 1. 品名分行處理
             if (n.includes("［")) {
@@ -908,9 +933,12 @@
             // 寬度限制設為 128px (35mm扣除內距)，基準縮小5% (20.9)，確保絕對不溢出
             const specBigFontSize = getFontSizeForWidth(s, 128, 20.9);
 
+            const trimMarkHTML = isTrimmed ? `<div class="trim-mark">*</div>` : '';
+
             return `<div class="label-page spec-size spec-label">
             <div class="name-top" style="font-size: ${nameFontSize}">${displayName}</div>
             <div class="spec-big" style="font-size: ${specBigFontSize}"><span>${s}</span></div>
+            ${trimMarkHTML}
         </div>`;
         }
 
