@@ -145,8 +145,8 @@
             border-radius: 6px;
             text-align: center;
             font-weight: 600;
-            color: #95a5a6;
-            background-color: #fafbfc;
+            color: var(--text-main);
+            background-color: #ffffff;
             transition: all 0.25s ease;
         }
 
@@ -479,6 +479,14 @@
                 </div>
 
                 <div class="setup-item">
+                    <label>✂️ 整理設定</label>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; height: 42px; padding: 0 14px; background: white; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; font-weight: 600; box-sizing: border-box; user-select: none;">
+                        <input type="checkbox" id="globalTrim" onchange="generatePreview()" style="transform: scale(1.3); cursor: pointer; accent-color: var(--primary-accent);">
+                        標註整理 (印出 *)
+                    </label>
+                </div>
+
+                <div class="setup-item">
                     <label>操作功能</label>
                     <div style="display: flex; gap: 10px;">
                         <button class="btn-paste" style="flex: 1;" onclick="pasteFromClipboard()">📋 貼上 Excel</button>
@@ -493,21 +501,18 @@
                 <thead>
                     <tr>
                         <th width="160">製作品項</th>
-                        <th width="70">整理<br><input type="checkbox" id="selectAllTrim" onchange="toggleSelectAllTrim(this)" style="cursor: pointer; transform: scale(1.1); margin-top: 3px;" title="全選/取消全選整理"></th>
-                        <th width="90">原料月份</th>
                         <th>1kg 箱數<br><small>(3入/箱)</small></th>
                         <th>300g 箱數<br><small>(10入/箱)</small></th>
                         <th>5KG/件</th>
                         <th style="background-color: #f1f4f8; color: var(--neutral-accent);">自訂規格文字 與 數量</th>
                         <th>樣品</th>
+                        <th width="90">原料月份</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody"></tbody>
                 <tfoot>
                     <tr class="custom-row">
                         <td><input type="text" id="blankName" class="input-blank-name" placeholder="+ 手寫新增品項"></td>
-                        <td><input type="checkbox" id="blankTrim" class="chk-trim" style="cursor: pointer; transform: scale(1.2);"></td>
-                        <td><select id="blankMonth" class="row-month" style="padding: 6px;"></select></td>
                         <td><input type="number" id="blank1k" value="0" onfocus="this.select()"></td>
                         <td><input type="number" id="blank300" value="0" onfocus="this.select()"></td>
                         <td></td>
@@ -516,6 +521,7 @@
                             <input type="number" id="blankSpecQty" value="0" onfocus="this.select()">
                         </td>
                         <td><input type="number" id="blankSample" value="0" onfocus="this.select()"></td>
+                        <td><select id="blankMonth" class="row-month" style="padding: 6px;"></select></td>
                     </tr>
                 </tfoot>
             </table>
@@ -593,8 +599,6 @@
             tbody.innerHTML += `
             <tr data-name="${key}">
                 <td class="product-name">${name}</td>
-                <td><input type="checkbox" class="chk-trim" style="cursor: pointer; transform: scale(1.2);"></td>
-                <td><select class="row-month">${getMonthHTML()}</select></td>
                 <td><input type="number" class="q1k" value="0" onfocus="this.select()"></td>
                 <td><input type="number" class="q300" value="0" onfocus="this.select()"></td>
                 <td>${isButterLettuce ? `<input type="number" class="q5k" value="0" onfocus="this.select()">` : ''}</td>
@@ -603,15 +607,11 @@
                     <input type="number" class="sQty" value="0" onfocus="this.select()">
                 </td>
                 <td><input type="number" class="qSample" value="0" onfocus="this.select()"></td>
+                <td><select class="row-month">${getMonthHTML()}</select></td>
             </tr>
         `;
         });
         document.getElementById('blankMonth').innerHTML = getMonthHTML();
-
-        function toggleSelectAllTrim(master) {
-            const checked = master.checked;
-            document.querySelectorAll('.chk-trim').forEach(chk => chk.checked = checked);
-        }
 
         function updateInputStyle(input) {
             if (!input || input.type !== 'number') return;
@@ -653,52 +653,135 @@
             }
         }
 
+        // 支援任意位置按下 Ctrl+V 快捷鍵自動解析貼上
+        document.addEventListener('paste', function (e) {
+            const clipboardData = e.clipboardData || window.clipboardData;
+            if (!clipboardData) return;
+            const text = clipboardData.getData('text');
+            if (text && (text.includes('\t') || text.includes('\n'))) {
+                e.preventDefault();
+                processData(text);
+            }
+        });
+
         function processData(text) {
             const lines = text.trim().split(/\r?\n/);
             let count = 0;
+            if (lines.length === 0) return;
 
             let colMap = {
                 name: 0,
-                q1k: 1,
-                q300: 2,
+                q1k: -1,
+                q300: -1,
                 q5k: -1,
+                qSample: -1,
+                trim: -1,
+                month: -1,
                 custom: {}
             };
 
+            const firstParts = lines[0].split(/[,\t]/).map(s => s.trim());
+            const firstCell = firstParts[0] || "";
+
+            // 判斷第一列是否為產品名稱資料列（若是，則絕對不是標題列）
+            const isFirstCellProduct = products.some(pKey => isProductMatch(firstCell, pKey));
+
             let hasHeader = false;
-            if (lines.length > 0) {
-                const firstParts = lines[0].split(/[,\t]/).map(s => s.trim());
-                if (firstParts[0].includes("品項") || firstParts[0].includes("品") || firstParts.some(p => p.includes("kg") || p.includes("g") || p.includes("箱") || p.includes("包"))) {
+            if (!isFirstCellProduct) {
+                // 檢查是否含有明確的標題關鍵字
+                const isHeaderKey = (s) => {
+                    const low = s.toLowerCase();
+                    return low.includes("品項") || low.includes("品名") || low.includes("1kg") || low.includes("300g") || low.includes("5kg") || low.includes("箱數") || low.includes("樣品") || low.includes("月份") || low.includes("規格");
+                };
+
+                if (firstParts.some(isHeaderKey)) {
                     hasHeader = true;
-                    colMap = {
-                        name: 0,
-                        q1k: -1,
-                        q300: -1,
-                        q5k: -1,
-                        custom: {}
-                    };
                     firstParts.forEach((part, idx) => {
                         const cleanPart = part.toLowerCase();
-                        if (cleanPart.includes("品項") || cleanPart.includes("品名") || idx === 0) {
+                        if (cleanPart.includes("品項") || cleanPart.includes("品名") || (idx === 0 && !cleanPart.includes("kg") && !cleanPart.includes("g"))) {
                             colMap.name = idx;
-                        } else if (cleanPart.includes("1kg") || cleanPart.includes("1k")) {
+                        } else if (cleanPart.includes("1kg") || cleanPart.includes("1k") || cleanPart.includes("1公斤")) {
                             colMap.q1k = idx;
-                        } else if (cleanPart.includes("300g") || cleanPart.includes("300")) {
+                        } else if (cleanPart.includes("300g") || cleanPart.includes("300") || cleanPart.includes("300克")) {
                             colMap.q300 = idx;
-                        } else if (cleanPart.includes("5kg") || cleanPart.includes("5k")) {
+                        } else if (cleanPart.includes("5kg") || cleanPart.includes("5k") || cleanPart.includes("5公斤")) {
                             colMap.q5k = idx;
+                        } else if (cleanPart.includes("樣品") || cleanPart.includes("sample")) {
+                            colMap.qSample = idx;
+                        } else if (cleanPart.includes("整理")) {
+                            colMap.trim = idx;
+                        } else if (cleanPart.includes("月份") || cleanPart.includes("原料")) {
+                            colMap.month = idx;
+                        } else if (cleanPart.includes("合計") || cleanPart.includes("小計") || cleanPart.includes("總計") || cleanPart.includes("備註") || cleanPart.includes("單位")) {
+                            // 忽略計算與備註欄位
                         } else {
                             let specName = part.replace(/\/包|\/袋|\/箱|［.*?］|\[.*?\]/g, "").trim();
-                            colMap.custom[idx] = specName;
+                            if (specName && !specName.includes("自訂")) {
+                                colMap.custom[idx] = specName;
+                            } else if (specName) {
+                                colMap.custom[idx] = "自訂規格";
+                            }
                         }
                     });
-                } else {
+                }
+            }
+
+            if (!hasHeader) {
+                // 無標題貼上時的智慧彈性對應（精準適應：1kg/包、300g/包、500g/包、600g/包、5K/箱、樣品）
+                const secondPart = firstParts[1] ? firstParts[1].trim() : '';
+                const isMonthCol = secondPart.includes("月") || secondPart === "--";
+
+                let offset = isMonthCol ? 1 : 0;
+                let monthIdx = isMonthCol ? 1 : -1;
+
+                const dataCols = firstParts.length - 1 - offset;
+
+                if (dataCols >= 5) {
+                    // [品名, (月份), 1:1kg, 2:300g, 3:500g(自訂), 4:600g(自訂), 5:5K(5kg), 6:樣品]
                     colMap = {
                         name: 0,
-                        q1k: 1,
-                        q300: 2,
-                        q5k: 4,
-                        custom: { 3: "600g" }
+                        month: monthIdx,
+                        q1k: 1 + offset,
+                        q300: 2 + offset,
+                        custom: {
+                            [3 + offset]: "500g",
+                            [4 + offset]: "600g"
+                        },
+                        q5k: 5 + offset,
+                        qSample: dataCols >= 6 ? 6 + offset : -1
+                    };
+                } else if (dataCols === 4) {
+                    // [品名, (月份), 1:1kg, 2:300g, 3:5kg, 4:樣品]
+                    colMap = {
+                        name: 0,
+                        month: monthIdx,
+                        q1k: 1 + offset,
+                        q300: 2 + offset,
+                        custom: {},
+                        q5k: 3 + offset,
+                        qSample: 4 + offset
+                    };
+                } else if (dataCols === 3) {
+                    // [品名, (月份), 1kg, 300g, 5kg]
+                    colMap = {
+                        name: 0,
+                        month: monthIdx,
+                        q1k: 1 + offset,
+                        q300: 2 + offset,
+                        q5k: 3 + offset,
+                        custom: {},
+                        qSample: -1
+                    };
+                } else {
+                    // [品名, (月份), 1kg, 300g]
+                    colMap = {
+                        name: 0,
+                        month: monthIdx,
+                        q1k: 1 + offset,
+                        q300: 2 + offset,
+                        q5k: -1,
+                        custom: {},
+                        qSample: -1
                     };
                 }
             }
@@ -709,38 +792,86 @@
                 const parts = line.split(/[,\t]/);
                 if (parts.length < 2) return;
 
-                const inputName = parts[colMap.name] ? parts[colMap.name].trim() : "";
-                if (!inputName || inputName.includes("品項") || inputName.includes("1kg") || inputName.includes("製作")) return;
+                let nameIdx = colMap.name;
+                let matchedProductKey = null;
 
-                let val1k = (colMap.q1k !== -1 && parts[colMap.q1k]) ? (parseInt(parts[colMap.q1k]) || 0) : 0;
-                let val300 = (colMap.q300 !== -1 && parts[colMap.q300]) ? (parseInt(parts[colMap.q300]) || 0) : 0;
-                let val5k = (colMap.q5k !== -1 && parts[colMap.q5k]) ? (parseInt(parts[colMap.q5k]) || 0) : 0;
+                // 智慧定位此列中真正的蔬菜品名欄位（預防 Excel 前方有空白欄）
+                parts.forEach((p, i) => {
+                    const cleanP = p.replace(/\s+/g, "").trim();
+                    if (cleanP && !matchedProductKey) {
+                        products.forEach(pKey => {
+                            if (isProductMatch(cleanP, pKey)) {
+                                nameIdx = i;
+                                matchedProductKey = pKey;
+                            }
+                        });
+                    }
+                });
+
+                const inputName = parts[nameIdx] ? parts[nameIdx].trim() : "";
+                if (!inputName || inputName.includes("品項") || inputName.includes("製作品項")) return;
+
+                // 當品名欄位產生位移時（如前方有前導 Tab），計算連帶偏移量
+                const shift = (nameIdx !== -1 && colMap.name !== -1) ? (nameIdx - colMap.name) : 0;
+
+                const getVal = (idx) => {
+                    if (idx === -1) return 0;
+                    const realIdx = idx + shift;
+                    return (realIdx >= 0 && parts[realIdx]) ? (parseInt(parts[realIdx].trim()) || 0) : 0;
+                };
+
+                const getStr = (idx) => {
+                    if (idx === -1) return "";
+                    const realIdx = idx + shift;
+                    return (realIdx >= 0 && parts[realIdx]) ? parts[realIdx].trim() : "";
+                };
+
+                let val1k = getVal(colMap.q1k);
+                let val300 = getVal(colMap.q300);
+                let val5k = getVal(colMap.q5k);
+                let valSample = getVal(colMap.qSample);
+                let valMonth = getStr(colMap.month);
+                let valTrimRaw = getStr(colMap.trim);
+                let valTrim = valTrimRaw === "true" || valTrimRaw === "V" || valTrimRaw === "v" || valTrimRaw === "1" || valTrimRaw === "是";
 
                 let customSpecs = [];
                 for (let idx in colMap.custom) {
-                    let qty = parseInt(parts[idx]) || 0;
+                    let baseIdx = parseInt(idx);
+                    let realIdx = baseIdx + shift;
+                    let rawVal = (realIdx >= 0 && parts[realIdx]) ? parts[realIdx].trim() : "";
+                    let qty = parseInt(rawVal) || 0;
                     if (qty > 0) {
+                        let text = colMap.custom[idx] !== "自訂規格" ? colMap.custom[idx] : "自訂規格";
                         customSpecs.push({
-                            text: colMap.custom[idx],
+                            text: text,
                             qty: qty
                         });
                     }
                 }
 
-                let targetRow = null;
-                products.forEach(pKey => {
-                    if (isProductMatch(inputName, pKey)) {
-                        targetRow = document.querySelector(`tr[data-name="${pKey}"]`);
-                    }
-                });
+                let targetRow = matchedProductKey ? document.querySelector(`tr[data-name="${matchedProductKey}"]`) : null;
 
                 if (targetRow) {
                     targetRow.querySelector('.q1k').value = val1k;
                     targetRow.querySelector('.q300').value = val300;
 
                     const q5kInput = targetRow.querySelector('.q5k');
-                    if (q5kInput) {
-                        q5kInput.value = val5k;
+                    if (q5kInput) q5kInput.value = val5k;
+
+                    const qSampleInput = targetRow.querySelector('.qSample');
+                    if (qSampleInput) qSampleInput.value = valSample;
+
+                    if (valMonth) {
+                        const monthSelect = targetRow.querySelector('.row-month');
+                        if (monthSelect) {
+                            let mStr = valMonth.replace(/月/g, '').padStart(2, '0');
+                            monthSelect.value = mStr;
+                        }
+                    }
+
+                    if (valTrim) {
+                        const globalTrim = document.getElementById('globalTrim');
+                        if (globalTrim) globalTrim.checked = true;
                     }
 
                     if (customSpecs.length > 0) {
@@ -758,6 +889,8 @@
                     document.getElementById('blankName').value = inputName;
                     document.getElementById('blank1k').value = val1k;
                     document.getElementById('blank300').value = val300;
+                    const blankSample = document.getElementById('blankSample');
+                    if (blankSample) blankSample.value = valSample;
                     if (customSpecs.length > 0) {
                         document.getElementById('blankSpecTxt').value = customSpecs[0].text;
                         document.getElementById('blankSpecQty').value = customSpecs[0].qty;
@@ -795,18 +928,18 @@
             document.querySelectorAll('input[type="number"]').forEach(i => i.value = 0);
             document.querySelectorAll('input[type="text"]').forEach(i => i.value = "");
             document.querySelectorAll('.row-month').forEach(s => s.selectedIndex = 0);
-            document.querySelectorAll('.chk-trim').forEach(chk => chk.checked = false);
-            const selectAll = document.getElementById('selectAllTrim');
-            if (selectAll) selectAll.checked = false;
+            const globalTrim = document.getElementById('globalTrim');
+            if (globalTrim) globalTrim.checked = false;
             document.getElementById('batchMonth').selectedIndex = 0;
             document.getElementById('printArea').innerHTML = "";
             updateAllInputStyles();
-            showToast("已重置所有內容(含整理設定)");
+            showToast("已重置所有內容");
         }
 
         function generatePreview() {
             const mode = document.getElementById('labelMode').value;
             const pDate = document.getElementById('packDate').value.split('-').slice(1).join('/');
+            const isGlobalTrim = document.getElementById('globalTrim') ? document.getElementById('globalTrim').checked : false;
             const printArea = document.getElementById('printArea');
             printArea.innerHTML = "";
 
@@ -814,7 +947,7 @@
                 const name = row.querySelector('.product-name').innerText;
                 const mVal = row.querySelector('.row-month').value;
                 const sMonth = mVal ? mVal : "　";
-                const isTrimmed = row.querySelector('.chk-trim') ? row.querySelector('.chk-trim').checked : false;
+                const isTrimmed = isGlobalTrim;
 
                 const q1 = parseInt(row.querySelector('.q1k').value) || 0;
                 const q3 = parseInt(row.querySelector('.q300').value) || 0;
@@ -833,7 +966,7 @@
             if (bName) {
                 const bmVal = document.getElementById('blankMonth').value;
                 const bsMonth = bmVal ? bmVal : "　";
-                const bTrimmed = document.getElementById('blankTrim') ? document.getElementById('blankTrim').checked : false;
+                const bTrimmed = isGlobalTrim;
 
                 const bq1 = parseInt(document.getElementById('blank1k').value) || 0;
                 const bq3 = parseInt(document.getElementById('blank300').value) || 0;
