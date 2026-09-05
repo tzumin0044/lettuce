@@ -3,120 +3,388 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>生菜標籤管理系統 v13.9 - 品規格式優化版</title>
+    <title>生菜生產派工與標籤管理系統 v14.0</title>
+    <!-- 引入截圖套件 (用於派工單複製圖片發 LINE) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
             --primary-dark: #1a2a3a;
             --primary-accent: #007bff;
-            --success-green: #2ecc71;
+            --success-green: #27ae60;
+            --success-light: #d9ead3;
             --danger-red: #e74c3c;
             --neutral-accent: #34495e;
-            --bg-soft: #f8f9fa;
-            --border-color: #e0e6ed;
+            --purple-accent: #8e44ad;
+            --bg-soft: #f4f6f8;
+            --border-color: #dcdcdc;
             --text-main: #2c3e50;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif;
         }
 
         body {
             background: var(--bg-soft);
-            font-family: "PingFang TC", "Microsoft JhengHei", sans-serif;
             margin: 0;
             padding: 20px;
             color: var(--text-main);
         }
 
-        .header {
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* 緊湊一體化頂部導航列 */
+        .app-topbar {
             background: linear-gradient(135deg, var(--primary-dark) 0%, #2c3e50 100%);
             color: white;
-            padding: 15px 30px;
-            border-radius: 12px;
-            margin-bottom: 20px;
+            padding: 10px 20px;
+            border-radius: 10px;
+            margin-bottom: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            flex-wrap: wrap;
+            gap: 12px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
         }
 
-        .header h2 {
-            margin: 0;
-            font-size: 22px;
-            font-weight: 600;
+        .brand-title {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
+            font-size: 18px;
+            font-weight: 700;
+            white-space: nowrap;
         }
 
-        .card {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            margin-bottom: 20px;
-            border: 1px solid var(--border-color);
-        }
-
-        .setup-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            align-items: flex-end;
-        }
-
-        .setup-item {
+        .topbar-controls {
             display: flex;
-            flex-direction: column;
+            align-items: center;
+            flex-wrap: wrap;
             gap: 8px;
         }
 
-        .setup-item label {
-            font-weight: 600;
-            font-size: 14px;
-            color: #5d6d7e;
+        .top-ctrl-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
 
-        .setup-grid select,
-        .setup-grid input[type="date"] {
-            padding: 10px 12px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
+        .top-ctrl-item input[type="date"],
+        .top-ctrl-item select {
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid #ccd1d9;
             outline: none;
-            font-size: 15px;
-            background-color: white;
-        }
-
-        table {
-            border-collapse: separate;
-            border-spacing: 0;
-            width: 100%;
-            margin-top: 10px;
+            font-size: 13px;
+            height: 32px;
             background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            font-weight: 600;
         }
 
-        th {
-            background: #f1f4f8;
-            padding: 15px 12px;
-            border-bottom: 2px solid var(--border-color);
-            color: #5d6d7e;
+        .trim-toggle-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            height: 32px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+            color: white;
+            transition: all 0.2s;
+        }
+
+        .trim-toggle-badge:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .topbar-btn {
+            height: 32px;
+            padding: 0 12px;
+            font-size: 13px;
+            border-radius: 6px;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* 頁籤導航與統計一體列 */
+        .tab-bar-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 12px;
+            border-bottom: 2px solid #dfe6e9;
+        }
+
+        .tab-nav {
+            display: flex;
+            gap: 4px;
+            margin-bottom: -2px;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            padding: 9px 18px;
             font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            font-weight: 700;
+            color: #7f8c8d;
+            cursor: pointer;
+            border-radius: 8px 8px 0 0;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
-        td {
-            padding: 12px;
-            border-bottom: 1px solid var(--border-color);
+        .tab-btn:hover {
+            color: var(--primary-accent);
+            background: rgba(0, 123, 255, 0.06);
+        }
+
+        .tab-btn.active {
+            color: var(--primary-dark);
+            background: white;
+            border: 1px solid #dfe6e9;
+            border-bottom: 3px solid var(--primary-accent);
+            box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.03);
+        }
+
+        .quick-stats-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #5d6d7e;
+            padding-bottom: 4px;
+        }
+
+        .stat-chip {
+            background: #eef2f7;
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* 卡片共用樣式 */
+        .card {
+            background: white;
+            padding: 16px 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            margin-bottom: 16px;
+            border: 1px solid #e1e8ed;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.2s ease-in-out;
+        }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 按鈕系統 */
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        .btn-paste { background: var(--purple-accent); color: white; }
+        .btn-paste:hover { background: #732d91; }
+        .btn-run { background: var(--success-green); color: white; }
+        .btn-run:hover { background: #219150; }
+        .btn-copy-img { background: #00c300; color: white; }
+        .btn-copy-img:hover { background: #009900; }
+        .btn-preview { background: var(--primary-accent); color: white; }
+        .btn-preview:hover { background: #0069d9; }
+        .btn-print { background: #2ecc71; color: white; }
+        .btn-print:hover { background: #27ae60; }
+        .btn-clear { background: var(--danger-red); color: white; }
+        .btn-clear:hover { background: #c0392b; }
+        .btn-secondary { background: #95a5a6; color: white; }
+        .btn-secondary:hover { background: #7f8c8d; }
+
+        /* 快捷貼上輸入框 */
+        .paste-box-area {
+            margin-bottom: 15px;
+            padding: 10px 14px;
+            background: #fdfefe;
+            border: 1px dashed #bdc3c7;
+            border-radius: 6px;
+        }
+
+        .paste-box-area textarea {
+            width: 100%;
+            height: 42px;
+            padding: 8px;
+            border: 1px solid #ccd1d9;
+            border-radius: 4px;
+            resize: vertical;
+            font-size: 13px;
+        }
+
+        /* 派工控制面板 */
+        .result-control-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding: 12px 18px;
+            background: #eef2f5;
+            border-radius: 8px;
+        }
+
+        .group-inputs {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .group-inputs label {
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            color: var(--text-main);
+        }
+
+        .group-inputs input {
+            width: 55px;
+            padding: 6px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
             text-align: center;
-            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: bold;
         }
 
-        .product-name {
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        /* 產出表格截圖區塊 */
+        #captureArea {
+            padding: 18px;
+            background: #ffffff;
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+        }
+
+        .result-group {
+            margin-bottom: 22px;
+        }
+
+        .result-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .group-header {
+            background: var(--success-light);
+            font-weight: bold;
+            padding: 9px 14px;
+            border: 1px solid #b6d7a8;
+            border-bottom: none;
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #274e13;
+        }
+
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            background: #fff;
+        }
+
+        .result-table th, .result-table td {
+            border: 1px solid #dcdcdc;
+            padding: 6px 8px;
+            text-align: center;
+        }
+
+        .result-table th {
+            background-color: #f3f3f3;
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* 明細輸入表格 */
+        table.data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 13.5px;
+            background: #fff;
+        }
+
+        table.data-table th, table.data-table td {
+            border: 1px solid #dcdcdc;
+            padding: 6px 8px;
+            text-align: center;
+        }
+
+        table.data-table th {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .th-orange { background-color: #fce5cd !important; }
+        .th-green { background-color: #d9ead3 !important; }
+        .th-misc { background-color: #e6b8af !important; }
+
+        .item-name {
             text-align: left;
             font-weight: 600;
-            padding-left: 20px;
+            padding-left: 12px;
             color: var(--text-main);
-            background: #fafbfc;
+        }
+
+        .special-row {
+            background-color: #cfe2f3 !important;
         }
 
         .custom-row {
@@ -129,28 +397,24 @@
         }
 
         @keyframes highlightFade {
-            from {
-                background-color: #d1f2eb;
-            }
-
-            to {
-                background-color: #e8f8f5;
-            }
+            from { background-color: #d1f2eb; }
+            to { background-color: #e8f8f5; }
         }
 
-        input[type="number"] {
-            width: 65px;
-            padding: 8px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
+        input.qty-input, input[type="number"] {
+            width: 58px;
+            padding: 5px;
+            border: 1px solid #dcdcdc;
+            border-radius: 4px;
             text-align: center;
+            font-size: 13.5px;
             font-weight: 600;
             color: #95a5a6;
             background-color: #fafbfc;
-            transition: all 0.25s ease;
+            transition: all 0.2s ease;
         }
 
-        input[type="number"].has-value {
+        input.qty-input.has-value, input[type="number"].has-value {
             background-color: #e8f8f5;
             color: #117a65;
             border-color: #2ecc71;
@@ -158,107 +422,52 @@
             box-shadow: 0 0 4px rgba(46, 204, 113, 0.2);
         }
 
-        input[type="number"]:focus {
+        input.qty-input:focus, input[type="number"]:focus {
             border-color: var(--primary-accent);
             background-color: #fff;
             color: var(--text-main);
-            box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
             outline: none;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
         }
 
         input[type="text"] {
-            padding: 8px;
+            padding: 6px 8px;
             border: 1px solid var(--border-color);
-            border-radius: 6px;
+            border-radius: 4px;
             outline: none;
-            transition: border-color 0.2s;
-        }
-
-        input[type="text"]:focus {
-            border-color: var(--neutral-accent);
+            font-size: 13px;
         }
 
         .spec-input-text {
-            width: 100px;
-            font-size: 13px;
+            width: 90px;
+            font-size: 12.5px;
             border-style: dashed !important;
         }
 
         .input-blank-name {
-            width: 130px;
+            width: 140px;
             font-weight: bold;
-            border-color: var(--neutral-accent) !important;
         }
 
-        .action-bar {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-top: 25px;
-            padding: 20px;
-            background: #f1f4f8;
-            border-radius: 12px;
-        }
-
-        button {
-            padding: 10px 24px;
-            cursor: pointer;
-            border: none;
-            border-radius: 8px;
+        /* 浮動提示 Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(44, 62, 80, 0.95);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            display: none;
+            z-index: 2000;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
             font-weight: 600;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            font-size: 15px;
+            font-size: 14px;
         }
 
-        button:active {
-            transform: translateY(1px);
-        }
-
-        .btn-preview {
-            background: var(--primary-accent);
-            color: white;
-            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
-        }
-
-        .btn-preview:hover {
-            background: #0069d9;
-        }
-
-        .btn-print {
-            background: var(--success-green);
-            color: white;
-            box-shadow: 0 4px 10px rgba(46, 204, 113, 0.2);
-        }
-
-        .btn-print:hover {
-            background: #27ae60;
-        }
-
-        .btn-paste {
-            background: var(--neutral-accent);
-            color: white;
-            box-shadow: 0 4px 10px rgba(52, 73, 94, 0.2);
-            height: 42px;
-        }
-
-        .btn-paste:hover {
-            background: #2c3e50;
-        }
-
-        .btn-clear {
-            background: #95a5a6;
-            color: white;
-            height: 42px;
-        }
-
-        .btn-clear:hover {
-            background: #7f8c8d;
-        }
-
+        /* =========================================================
+           🔒 標籤與列印樣式 (100% 嚴格凍結，保證尺寸排版完全不變)
+           ========================================================= */
         #printArea {
             padding: 20px;
             display: flex;
@@ -290,30 +499,6 @@
             height: 25mm;
             max-width: 35mm;
             max-height: 25mm;
-        }
-
-        @media print {
-            .no-print {
-                display: none !important;
-            }
-
-            body {
-                padding: 0;
-                background: white;
-            }
-
-            #printArea {
-                padding: 0;
-                display: block;
-            }
-
-            .label-page {
-                border: none;
-                margin: 0;
-                page-break-after: always;
-                display: block;
-                box-shadow: none;
-            }
         }
 
         /* --- 外箱標籤佈局 --- */
@@ -384,12 +569,20 @@
             padding: 0;
             text-align: center;
             justify-content: flex-start;
-            /* 改為靠上排列，透過高度控制 */
+            position: relative;
+        }
+
+        .spec-label .trim-mark {
+            position: absolute;
+            bottom: 0.5mm;
+            right: 1.5mm;
+            font-size: 16pt;
+            font-weight: 900;
+            line-height: 1;
         }
 
         .spec-label .name-top {
             height: 58%;
-            /* 稍微拉大品名空間 */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -410,53 +603,56 @@
             white-space: nowrap;
             line-height: 1;
             box-sizing: border-box;
-            /* 實作：將規格上移 0.2cm (2mm) 並預留緩衝 */
             padding-bottom: 2.5mm;
         }
 
-        .toast {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background: rgba(44, 62, 80, 0.95);
-            color: white;
-            padding: 15px 30px;
-            border-radius: 50px;
-            display: none;
-            z-index: 2000;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-            font-weight: 600;
+        /* 列印媒體查詢：列印時只輸出 #printArea 標籤，隱藏所有其它介面 */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+
+            body {
+                padding: 0;
+                background: white;
+            }
+
+            #printArea {
+                padding: 0;
+                display: block;
+            }
+
+            .label-page {
+                border: none;
+                margin: 0;
+                page-break-after: always;
+                display: block;
+                box-shadow: none;
+            }
         }
     </style>
 </head>
 
 <body>
 
-    <div class="header no-print">
-        <h2>🥬 生菜標籤管理系統 <span style="font-weight: 300; opacity: 0.8; font-size: 16px;">v13.9</span></h2>
+    <div class="container">
+        <!-- 緊湊一體化頂部導航列 -->
+        <div class="app-topbar no-print">
+            <div class="brand-title">
+                <span>🥬 生菜生產派工與標籤管理系統</span>
+                <span style="font-size: 11px; background: rgba(255, 255, 255, 0.2); padding: 2px 7px; border-radius: 12px; font-weight: normal;">v14.0</span>
+            </div>
 
-    </div>
-
-    <div class="controls no-print">
-        <div class="card">
-            <div class="setup-grid">
-                <div class="setup-item">
-                    <label>📅 製作日期</label>
+            <div class="topbar-controls">
+                <div class="top-ctrl-item" title="製作日期">
+                    <span style="font-size: 14px;">📅</span>
                     <input type="date" id="packDate">
                 </div>
 
-                <div class="setup-item">
-                    <label>📄 列印模式</label>
-                    <select id="labelMode" onchange="generatePreview()">
-                        <option value="box">📦 外箱貼 (84.9x62.4mm)</option>
-                        <option value="spec">🏷️ 品規貼 (35x25mm)</option>
-                    </select>
-                </div>
-
-                <div class="setup-item">
-                    <label>🌙 快速設定原料月份</label>
+                <div class="top-ctrl-item" title="原料月份">
+                    <span style="font-size: 14px;">🌙</span>
                     <select id="batchMonth" onchange="applyBatchMonth()">
-                        <option value="">選擇月份</option>
+                        <option value="">原料月份</option>
                         <script>
                             for (let i = 1; i <= 12; i++) {
                                 let m = i.toString().padStart(2, '0');
@@ -466,133 +662,289 @@
                     </select>
                 </div>
 
-                <div class="setup-item">
-                    <label>操作功能</label>
-                    <div style="display: flex; gap: 10px;">
-                        <button class="btn-paste" style="flex: 1;" onclick="pasteFromClipboard()">📋 貼上 Excel</button>
-                        <button class="btn-clear" onclick="clearNumbers()">重置</button>
+                <label class="trim-toggle-badge" title="品規標籤右下角是否印出 *">
+                    <input type="checkbox" id="globalTrim" onchange="generatePreview()" style="transform: scale(1.15); cursor: pointer; accent-color: var(--primary-accent);">
+                    <span>✂️ 整理 (*)</span>
+                </label>
+
+                <button class="btn-paste topbar-btn" onclick="pasteFromClipboard()" title="直接讀取剪貼簿貼上 Excel 資料">
+                    📋 貼上 Excel
+                </button>
+
+                <button class="btn-secondary topbar-btn" onclick="togglePasteBox()" title="展開/收合備用文字貼上輸入框" style="padding: 0 8px;">
+                    📝 備用框
+                </button>
+
+                <button class="btn-clear topbar-btn" onclick="clearAllData()" title="清空所有數量與結果">
+                    🗑️ 清空
+                </button>
+            </div>
+        </div>
+
+        <!-- 可折疊備用貼上文字框 (預設隱藏，節省空間) -->
+        <div id="pasteBoxCollapse" class="no-print" style="display: none; margin-bottom: 12px;">
+            <div class="paste-box-area" style="margin: 0; padding: 8px 12px;">
+                <textarea id="pasteInput" placeholder="在此處按 Ctrl+V 貼上 Excel 製作數量區塊，系統會即刻解析填入..."></textarea>
+            </div>
+        </div>
+
+        <!-- 頁籤導航與即時統計一體列 -->
+        <div class="tab-bar-container no-print">
+            <div class="tab-nav">
+                <button class="tab-btn active" id="tabBtn-data" onclick="switchTab('data')">
+                    📋 製作數量明細表
+                </button>
+                <button class="tab-btn" id="tabBtn-label" onclick="switchTab('label')">
+                    🏷️ 標籤列印管理
+                </button>
+                <button class="tab-btn" id="tabBtn-distribute" onclick="switchTab('distribute')">
+                    🌿 製作分組派工
+                </button>
+            </div>
+
+            <div class="quick-stats-bar" id="quickStats">
+                <span class="stat-chip" id="statItems">總品項: 0 種</span>
+                <span class="stat-chip" id="statWeight">總重量: 0 kg</span>
+                <span class="stat-chip" id="statQty">總包數: 0 包</span>
+            </div>
+        </div>
+
+        <!-- ==========================================
+             頁籤 1: 📋 每日製作數量明細表
+             ========================================== -->
+        <div id="tabContent-data" class="tab-content active no-print">
+            <div class="card" style="padding: 10px; overflow-x: auto;">
+                <table id="mainTable" class="data-table">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" style="width: 22%;">製作品項</th>
+                            <th rowspan="2" style="width: 8%;">原料月份</th>
+                            <th class="th-orange">橘苔 (1kg)</th>
+                            <th class="th-green">綠苔 (300g)</th>
+                            <th colspan="2" class="th-misc">雜苔</th>
+                            <th>箱裝</th>
+                            <th colspan="2" style="background-color: #f1f4f8;">自訂規格與數量</th>
+                            <th rowspan="2" style="width: 6%;">樣品</th>
+                        </tr>
+                        <tr>
+                            <th>1kg/包<br><small>(3入/箱)</small></th>
+                            <th>300g/包<br><small>(10入/箱)</small></th>
+                            <th>500g/包</th>
+                            <th>600g/包</th>
+                            <th>5K/箱</th>
+                            <th style="font-size: 12px;">規格名稱</th>
+                            <th style="font-size: 12px;">數量</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                    <tfoot>
+                        <tr class="custom-row">
+                            <td><input type="text" id="blankName" class="input-blank-name" placeholder="+ 手寫新增品項"></td>
+                            <td><select id="blankMonth" class="row-month" style="padding: 4px; font-size: 13px;"></select></td>
+                            <td><input type="number" id="blank1k" value="0" min="0" onfocus="this.select()"></td>
+                            <td><input type="number" id="blank300" value="0" min="0" onfocus="this.select()"></td>
+                            <td><input type="number" id="blank500" value="0" min="0" onfocus="this.select()"></td>
+                            <td><input type="number" id="blank600" value="0" min="0" onfocus="this.select()"></td>
+                            <td><input type="number" id="blank5k" value="0" min="0" onfocus="this.select()"></td>
+                            <td><input type="text" id="blankSpecTxt" class="spec-input-text" placeholder="自訂規格"></td>
+                            <td><input type="number" id="blankSpecQty" value="0" min="0" onfocus="this.select()"></td>
+                            <td><input type="number" id="blankSample" value="0" min="0" onfocus="this.select()"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+        <!-- ==========================================
+             頁籤 2: 🏷️ 標籤列印管理
+             ========================================== -->
+        <div id="tabContent-label" class="tab-content no-print">
+            <div class="card" style="padding: 16px 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <label style="font-weight: bold; font-size: 14px;">📄 列印模式：</label>
+                        <select id="labelMode" onchange="generatePreview()" style="padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-color); font-size: 14px;">
+                            <option value="box">📦 外箱貼 (84.9x62.4mm)</option>
+                            <option value="spec">🏷️ 品規貼 (35x25mm)</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; gap: 12px;">
+                        <button class="btn-preview" onclick="generatePreview()">✨ 產生標籤預覽</button>
+                        <button class="btn-print" onclick="window.print()">🖨️ 確認列印標籤</button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="card" style="padding: 0; overflow: hidden;">
-            <table id="mainTable">
-                <thead>
-                    <tr>
-                        <th width="180">製作品項</th>
-                        <th width="100">原料月份</th>
-                        <th>1kg 箱數<br><small>(3入/箱)</small></th>
-                        <th>300g 箱數<br><small>(10入/箱)</small></th>
-                        <th>5KG/件</th>
-                        <th style="background-color: #f1f4f8; color: var(--neutral-accent);">自訂規格文字 與 數量</th>
-                        <th>樣品</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody"></tbody>
-                <tfoot>
-                    <tr class="custom-row">
-                        <td><input type="text" id="blankName" class="input-blank-name" placeholder="+ 手寫新增品項"></td>
-                        <td><select id="blankMonth" class="row-month" style="padding: 6px;"></select></td>
-                        <td><input type="number" id="blank1k" value="0" onfocus="this.select()"></td>
-                        <td><input type="number" id="blank300" value="0" onfocus="this.select()"></td>
-                        <td></td>
-                        <td style="background-color: #f8f9fa;">
-                            <input type="text" id="blankSpecTxt" class="spec-input-text" placeholder="自訂規格">
-                            <input type="number" id="blankSpecQty" value="0" onfocus="this.select()">
-                        </td>
-                        <td><input type="number" id="blankSample" value="0" onfocus="this.select()"></td>
-                    </tr>
-                </tfoot>
-            </table>
+        <!-- ==========================================
+             頁籤 3: 🌿 製作分組派工
+             ========================================== -->
+        <div id="tabContent-distribute" class="tab-content no-print">
+            <div class="card" style="padding: 16px 20px;">
+                <!-- 派工明細結果區標題與提示 -->
+                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px;">
+                    <h3 style="margin: 0; color: #2c3e50; font-size: 17px;">📋 分組派工平衡結果</h3>
+                    <span id="versionHint" style="font-size: 13px; color: #27ae60; font-weight: bold;"></span>
+                </div>
 
-            <div class="action-bar no-print">
-                <button class="btn-preview" onclick="generatePreview()">✨ 產生標籤預覽</button>
-                <button class="btn-print" onclick="window.print()">🖨️ 確認列印標籤</button>
+                <!-- 派工操作控制列 -->
+                <div class="result-control-panel">
+                    <div class="group-inputs">
+                        <label>A組人數: <input type="number" id="peopleA" value="3" min="1"></label>
+                        <label>B組人數: <input type="number" id="peopleB" value="2" min="1"></label>
+                        <label>C組人數: <input type="number" id="peopleC" value="3" min="1"></label>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn-run" onclick="distribute()">🎲 隨機換下一組配法</button>
+                        <button class="btn-copy-img" onclick="copyTableAsImage()">📸 一鍵複製圖片傳 LINE</button>
+                    </div>
+                </div>
+
+                <!-- 產出表格截圖區塊 -->
+                <div id="captureArea">
+                    <div id="resultContent" style="color: #888; text-align: center; padding: 30px;">
+                        尚未執行分配，請確認製作數量與人數後點擊「🎲 隨機換下一組配法」。
+                    </div>
+                </div>
             </div>
         </div>
+
+        <!-- 標籤輸出區 (在所有模式下都可輸出，列印時只呈現此區) -->
+        <div id="printArea"></div>
     </div>
 
     <div id="toast" class="toast">數據已成功匯入！</div>
-    <div id="printArea"></div>
 
     <script>
+        // 設定今日日期
         document.getElementById('packDate').value = new Date().toISOString().split('T')[0];
 
+        // 完整品項定義 (整合派工與標籤兩邊所有品項與規格特徵)
         const products = [
-            "紅捲", "綠捲鬚", "紅橡木", "綠橡木", "紅火焰", "綠火焰", "紅蘿蔓",
-            "奶油生菜", "羽衣甘藍", "巴西里［平葉］", "巴西里［捲葉］", "紅包心",
-            "紅甜脆", "綠甜脆", "綠水晶", "廣A"
+            { key: "紅捲", name: "紅捲生菜", special: false },
+            { key: "綠捲鬚", name: "綠捲鬚生菜", special: false },
+            { key: "紅橡木", name: "紅橡木生菜", special: false },
+            { key: "綠橡木", name: "綠橡木生菜", special: false },
+            { key: "紅火焰", name: "紅火焰生菜", special: false },
+            { key: "綠火焰", name: "綠火焰生菜", special: false },
+            { key: "紅蘿蔓", name: "紅蘿蔓", special: false },
+            { key: "奶油生菜", name: "波士頓奶油生菜", special: false },
+            { key: "羽衣甘藍", name: "羽衣甘藍", special: false },
+            { key: "巴西里［平葉］", name: "巴西里 [平葉]", special: false },
+            { key: "巴西里［捲葉］", name: "巴西里 [捲葉]", special: false },
+            { key: "紅包心", name: "紅包心生菜", special: false },
+            { key: "紅甜脆", name: "紅甜脆生菜 [水耕]", labelName: "紅甜脆［水耕］", special: false },
+            { key: "綠甜脆", name: "綠甜脆生菜 [水耕]", labelName: "綠甜脆［水耕］", special: false },
+            { key: "綠水晶", name: "綠水晶生菜 [水耕]", labelName: "綠水晶［水耕］", special: false },
+            { key: "廣A", name: "廣東生菜", special: false },
+            { key: "綠火焰_雜苔", name: "綠火焰生菜 (雜苔/特)", labelName: "綠火焰 (雜苔/特)", special: true },
+            { key: "綠火焰水耕_雜苔", name: "綠火焰生菜[水耕] (雜苔/特)", labelName: "綠火焰［水耕］(雜苔/特)", special: true }
         ];
 
-        const displayNames = {
-            "紅甜脆": "紅甜脆［水耕］",
-            "綠甜脆": "綠甜脆［水耕］",
-            "綠水晶": "綠水晶［水耕］",
-            "廣A": "廣東生菜"
-        };
+        // 各規格派工重量權重 (1kg=1.0, 300g=0.3, 500g=0.5, 600g=0.6, 5K=5.0)
+        const WEIGHT_FACTORS = [1.0, 0.3, 0.5, 0.6, 5.0];
 
-        function isProductMatch(inputName, pKey) {
-            if (!pKey) return false;
+        let historySignatures = [];
+        let clickCount = 0;
 
-            // 優先排除平葉與捲葉巴西里互相誤判的狀況
-            if (pKey === "巴西里［捲葉］" && (inputName.includes("歐芹") || inputName.includes("平葉"))) return false;
-            if (pKey === "巴西里［平葉］" && (inputName === "巴西里" || inputName.includes("捲葉"))) return false;
-
-            const cleanInput = inputName.replace(/生菜|［.*?］|\[.*?\]/g, "").trim();
-            const cleanKey = pKey.replace(/生菜|［.*?］|\[.*?\]/g, "").trim();
-
-            const aliases = {
-                "廣A": ["廣東", "廣東生菜", "廣東A菜", "廣A"],
-                "奶油生菜": ["波士頓奶油", "奶油生菜", "波士頓奶油生菜"],
-                "巴西里［平葉］": ["歐芹", "平葉巴西里", "義大利巴西里", "巴西里［平葉］"],
-                "巴西里［捲葉］": ["巴西里", "捲葉巴西里", "巴西里［捲葉］"]
-            };
-
-            if (cleanInput === cleanKey) return true;
-
-            if (aliases[pKey]) {
-                for (const alias of aliases[pKey]) {
-                    const cleanAlias = alias.replace(/生菜|［.*?］|\[.*?\]/g, "").trim();
-                    if (cleanInput === cleanAlias || cleanInput.includes(cleanAlias) || cleanAlias.includes(cleanInput)) {
-                        return true;
-                    }
-                }
-            }
-
-            if (cleanKey.length >= 2 && cleanInput.includes(cleanKey)) {
-                return true;
-            }
-            return false;
-        }
-
-        const tbody = document.getElementById('tableBody');
+        // 月份下拉選項生成
         const getMonthHTML = () => {
             let h = `<option value="">--</option>`;
-            for (let i = 1; i <= 12; i++) h += `<option value="${i.toString().padStart(2, '0')}">${i}月</option>`;
+            for (let i = 1; i <= 12; i++) {
+                let m = i.toString().padStart(2, '0');
+                h += `<option value="${m}">${m}月</option>`;
+            }
             return h;
         };
 
-        products.forEach(key => {
-            const name = displayNames[key] || key;
-            const isButterLettuce = key === "奶油生菜";
-            tbody.innerHTML += `
-            <tr data-name="${key}">
-                <td class="product-name">${name}</td>
-                <td><select class="row-month">${getMonthHTML()}</select></td>
-                <td><input type="number" class="q1k" value="0" onfocus="this.select()"></td>
-                <td><input type="number" class="q300" value="0" onfocus="this.select()"></td>
-                <td>${isButterLettuce ? `<input type="number" class="q5k" value="0" onfocus="this.select()">` : ''}</td>
-                <td style="background-color: #f8f9fa;">
-                    <input type="text" class="sText spec-input-text" placeholder="輸入規格">
-                    <input type="number" class="sQty" value="0" onfocus="this.select()">
-                </td>
-                <td><input type="number" class="qSample" value="0" onfocus="this.select()"></td>
-            </tr>
-        `;
-        });
-        document.getElementById('blankMonth').innerHTML = getMonthHTML();
+        // 初始化表格
+        function initTable() {
+            const tbody = document.getElementById("tableBody");
+            tbody.innerHTML = "";
 
+            products.forEach((p, idx) => {
+                const tr = document.createElement("tr");
+                tr.setAttribute("data-key", p.key);
+                tr.setAttribute("data-row", idx);
+                if (p.special) tr.className = "special-row";
+
+                const displayName = p.labelName || p.name;
+                tr.innerHTML = `
+                    <td class="item-name">${p.name}</td>
+                    <td><select class="row-month" style="padding: 4px; font-size: 13px;">${getMonthHTML()}</select></td>
+                    <td><input type="number" min="0" class="qty-input q1k" data-col="0" value="0" onfocus="this.select()"></td>
+                    <td><input type="number" min="0" class="qty-input q300" data-col="1" value="0" onfocus="this.select()"></td>
+                    <td><input type="number" min="0" class="qty-input q500" data-col="2" value="0" onfocus="this.select()"></td>
+                    <td><input type="number" min="0" class="qty-input q600" data-col="3" value="0" onfocus="this.select()"></td>
+                    <td><input type="number" min="0" class="qty-input q5k" data-col="4" value="0" onfocus="this.select()"></td>
+                    <td style="background-color: #f8f9fa;">
+                        <input type="text" class="sText spec-input-text" placeholder="規格">
+                    </td>
+                    <td style="background-color: #f8f9fa;">
+                        <input type="number" min="0" class="sQty" value="0" onfocus="this.select()">
+                    </td>
+                    <td><input type="number" min="0" class="qSample" value="0" onfocus="this.select()"></td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('blankMonth').innerHTML = getMonthHTML();
+
+            // 監聽快捷貼上輸入框
+            document.getElementById("pasteInput").addEventListener("input", function () {
+                if (this.value.trim().length > 0) {
+                    parseAndProcessData(this.value);
+                    this.value = "";
+                }
+            });
+
+            // 監聽表格內輸入框變動以更新樣式與統計
+            document.getElementById('mainTable').addEventListener('input', function (e) {
+                if (e.target.tagName === 'INPUT') {
+                    if (e.target.type === 'number') updateInputStyle(e.target);
+                    updateQuickStats();
+                }
+            });
+
+            updateAllInputStyles();
+            updateQuickStats();
+        }
+
+        // 展開/收合備用文字貼上輸入框
+        function togglePasteBox() {
+            const box = document.getElementById('pasteBoxCollapse');
+            if (box) {
+                const isHidden = box.style.display === 'none' || box.style.display === '';
+                box.style.display = isHidden ? 'block' : 'none';
+                if (isHidden) {
+                    const input = document.getElementById('pasteInput');
+                    if (input) input.focus();
+                }
+            }
+        }
+
+        // 頁籤切換
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+
+            const targetBtn = document.getElementById(`tabBtn-${tabId}`);
+            const targetContent = document.getElementById(`tabContent-${tabId}`);
+
+            if (targetBtn) targetBtn.classList.add('active');
+            if (targetContent) targetContent.classList.add('active');
+
+            if (tabId === 'label') {
+                generatePreview();
+            } else if (tabId === 'distribute') {
+                // 如果尚未執行過分配且有輸入數據，可自動執行一次
+                if (clickCount === 0 && countTotalQty() > 0) {
+                    distribute();
+                }
+            }
+        }
+
+        // 樣式更新輔助
         function updateInputStyle(input) {
             if (!input || input.type !== 'number') return;
             const val = parseFloat(input.value) || 0;
@@ -609,54 +961,169 @@
             });
         }
 
-        // 監聽表格內所有輸入框的輸入事件
-        document.getElementById('mainTable').addEventListener('input', function (e) {
-            if (e.target.tagName === 'INPUT' && e.target.type === 'number') {
-                updateInputStyle(e.target);
+        // 統計頂部數據
+        function countTotalQty() {
+            let total = 0;
+            document.querySelectorAll('#tableBody input[type="number"], #blank1k, #blank300, #blank500, #blank600, #blank5k, #blankSpecQty').forEach(inp => {
+                total += parseInt(inp.value) || 0;
+            });
+            return total;
+        }
+
+        function updateQuickStats() {
+            let distinctItems = 0;
+            let totalWeight = 0;
+            let totalQty = 0;
+
+            document.querySelectorAll('#tableBody tr').forEach(row => {
+                const q1 = parseInt(row.querySelector('.q1k').value) || 0;
+                const q3 = parseInt(row.querySelector('.q300').value) || 0;
+                const q500 = parseInt(row.querySelector('.q500').value) || 0;
+                const q600 = parseInt(row.querySelector('.q600').value) || 0;
+                const q5k = parseInt(row.querySelector('.q5k').value) || 0;
+                const cQty = parseInt(row.querySelector('.sQty').value) || 0;
+                const rowQty = q1 + q3 + q500 + q600 + q5k + cQty;
+
+                if (rowQty > 0) {
+                    distinctItems++;
+                    totalQty += rowQty;
+                    totalWeight += (q1 * 1.0) + (q3 * 0.3) + (q500 * 0.5) + (q600 * 0.6) + (q5k * 5.0) + (cQty * 0.5);
+                }
+            });
+
+            // 手寫自訂列
+            const bq1 = parseInt(document.getElementById('blank1k').value) || 0;
+            const bq3 = parseInt(document.getElementById('blank300').value) || 0;
+            const bq500 = parseInt(document.getElementById('blank500').value) || 0;
+            const bq600 = parseInt(document.getElementById('blank600').value) || 0;
+            const bq5k = parseInt(document.getElementById('blank5k').value) || 0;
+            const bQty = parseInt(document.getElementById('blankSpecQty').value) || 0;
+            const bRowQty = bq1 + bq3 + bq500 + bq600 + bq5k + bQty;
+            if (bRowQty > 0) {
+                distinctItems++;
+                totalQty += bRowQty;
+                totalWeight += (bq1 * 1.0) + (bq3 * 0.3) + (bq500 * 0.5) + (bq600 * 0.6) + (bq5k * 5.0) + (bQty * 0.5);
             }
-        });
 
-        // 初始化所有輸入框樣式
-        updateAllInputStyles();
+            document.getElementById('statItems').innerText = `總品項: ${distinctItems} 種`;
+            document.getElementById('statWeight').innerText = `總重量: ${totalWeight.toFixed(1)} kg`;
+            document.getElementById('statQty').innerText = `總包數: ${totalQty} 包`;
+        }
 
+        // 品項模糊匹配器
+        function isProductMatch(inputName, productObj) {
+            if (!productObj || !inputName) return false;
+            const pKey = productObj.key;
+            const pName = productObj.name;
+
+            // 雜苔品項專門判斷
+            if (productObj.special) {
+                const isWater = inputName.includes("水耕");
+                if (pKey === "綠火焰水耕_雜苔") {
+                    return (inputName.includes("火焰") && isWater && (inputName.includes("雜") || inputName.includes("特")));
+                }
+                if (pKey === "綠火焰_雜苔") {
+                    return (inputName.includes("火焰") && !isWater && (inputName.includes("雜") || inputName.includes("特")));
+                }
+            }
+
+            // 一般綠火焰需避開雜苔/特
+            if ((pKey === "綠火焰" || pName.includes("綠火焰")) && (inputName.includes("雜") || inputName.includes("特"))) {
+                return false;
+            }
+
+            // 優先排除平葉與捲葉巴西里互相誤判
+            if (pKey.includes("捲葉") && (inputName.includes("歐芹") || inputName.includes("平葉"))) return false;
+            if (pKey.includes("平葉") && (inputName === "巴西里" || inputName.includes("捲葉"))) return false;
+
+            const cleanInput = inputName.replace(/生菜|［.*?］|\[.*?\]|\(.*?\)|（.*?）/g, "").trim();
+            const cleanKey = pKey.replace(/生菜|［.*?］|\[.*?\]|\(.*?\)|（.*?）/g, "").trim();
+            const cleanName = pName.replace(/生菜|［.*?］|\[.*?\]|\(.*?\)|（.*?）/g, "").trim();
+
+            if (cleanInput === cleanKey || cleanInput === cleanName) return true;
+
+            const aliases = {
+                "廣A": ["廣東", "廣東生菜", "廣東A菜", "廣A"],
+                "奶油生菜": ["波士頓奶油", "奶油生菜", "波士頓奶油生菜"],
+                "巴西里［平葉］": ["歐芹", "平葉巴西里", "義大利巴西里", "巴西里［平葉］", "巴西里 [平葉]"],
+                "巴西里［捲葉］": ["巴西里", "捲葉巴西里", "巴西里［捲葉］", "巴西里 [捲葉]"]
+            };
+
+            if (aliases[pKey]) {
+                for (const alias of aliases[pKey]) {
+                    const cleanAlias = alias.replace(/生菜|［.*?］|\[.*?\]|\(.*?\)|（.*?）/g, "").trim();
+                    if (cleanInput === cleanAlias || cleanInput.includes(cleanAlias) || cleanAlias.includes(cleanInput)) {
+                        return true;
+                    }
+                }
+            }
+
+            if (cleanKey.length >= 2 && cleanInput.includes(cleanKey)) {
+                return true;
+            }
+            return false;
+        }
+
+        // 剪貼簿貼上功能
         async function pasteFromClipboard() {
             try {
                 const text = await navigator.clipboard.readText();
-                if (!text) {
-                    showToast("剪貼簿沒有內容，請先在 Excel 複製範圍");
+                if (!text || text.trim() === "") {
+                    showToast("剪貼簿沒有內容，請先在 Excel 複製資料");
                     return;
                 }
-                processData(text);
+                parseAndProcessData(text);
             } catch (err) {
                 const manualText = prompt("請貼上從 Excel 複製的數據內容：");
-                if (manualText) processData(manualText);
+                if (manualText) parseAndProcessData(manualText);
             }
         }
 
-        function processData(text) {
-            const lines = text.trim().split(/\r?\n/);
+        // 智慧解析與填入資料 (支援純5欄數量、帶品名表格、帶標題等多種 Excel 複製格式)
+        function parseAndProcessData(rawText) {
+            const lines = rawText.trim().split(/\r?\n/).filter(r => r.trim().length > 0);
+            if (lines.length === 0) return;
+
             let count = 0;
+            const firstParts = lines[0].split(/[,\t]/).map(s => s.trim());
 
-            let colMap = {
-                name: 0,
-                q1k: 1,
-                q300: 2,
-                q5k: -1,
-                custom: {}
-            };
+            // 判斷是否為純 5 欄數量格式 (每一行第一個都是數字或只有數字)
+            const isPureQtyMatrix = lines.every(line => {
+                const cols = line.split(/[,\t]/).map(s => s.trim());
+                return cols.length <= 6 && cols.every(c => c === "" || !isNaN(Number(c)));
+            });
 
-            let hasHeader = false;
-            if (lines.length > 0) {
-                const firstParts = lines[0].split(/[,\t]/).map(s => s.trim());
+            if (isPureQtyMatrix) {
+                // 清空原先數量
+                document.querySelectorAll(".qty-input").forEach(input => input.value = 0);
+
+                lines.forEach((line, rIdx) => {
+                    if (rIdx >= products.length) return;
+                    let cols = line.split(/[,\t]/).map(c => c.trim());
+                    cols.forEach((val, cIdx) => {
+                        if (cIdx < 5) {
+                            const input = document.querySelector(`tr[data-row="${rIdx}"] .qty-input[data-col="${cIdx}"]`);
+                            if (input) {
+                                const num = parseInt(val);
+                                input.value = (!isNaN(num) && num > 0) ? num : 0;
+                            }
+                        }
+                    });
+                    const rowEl = document.querySelector(`tr[data-row="${rIdx}"]`);
+                    if (rowEl) {
+                        rowEl.classList.add('row-updated');
+                        setTimeout(() => rowEl.classList.remove('row-updated'), 2000);
+                    }
+                    count++;
+                });
+            } else {
+                // 帶有品名/標題的 Excel 格式
+                let hasHeader = false;
+                let colMap = { name: 0, q1k: 1, q300: 2, q500: 3, q600: 4, q5k: -1, custom: {} };
+
                 if (firstParts[0].includes("品項") || firstParts[0].includes("品") || firstParts.some(p => p.includes("kg") || p.includes("g") || p.includes("箱") || p.includes("包"))) {
                     hasHeader = true;
-                    colMap = {
-                        name: 0,
-                        q1k: -1,
-                        q300: -1,
-                        q5k: -1,
-                        custom: {}
-                    };
+                    colMap = { name: 0, q1k: -1, q300: -1, q500: -1, q600: -1, q5k: -1, trim: -1, custom: {} };
                     firstParts.forEach((part, idx) => {
                         const cleanPart = part.toLowerCase();
                         if (cleanPart.includes("品項") || cleanPart.includes("品名") || idx === 0) {
@@ -665,173 +1132,398 @@
                             colMap.q1k = idx;
                         } else if (cleanPart.includes("300g") || cleanPart.includes("300")) {
                             colMap.q300 = idx;
+                        } else if (cleanPart.includes("500g") || cleanPart.includes("500")) {
+                            colMap.q500 = idx;
+                        } else if (cleanPart.includes("600g") || cleanPart.includes("600")) {
+                            colMap.q600 = idx;
                         } else if (cleanPart.includes("5kg") || cleanPart.includes("5k")) {
                             colMap.q5k = idx;
+                        } else if (cleanPart.includes("整理") || cleanPart.includes("重工") || cleanPart.includes("修整")) {
+                            colMap.trim = idx;
                         } else {
                             let specName = part.replace(/\/包|\/袋|\/箱|［.*?］|\[.*?\]/g, "").trim();
                             colMap.custom[idx] = specName;
                         }
                     });
-                } else {
-                    colMap = {
-                        name: 0,
-                        q1k: 1,
-                        q300: 2,
-                        q5k: 4,
-                        custom: { 3: "600g" }
-                    };
                 }
-            }
 
-            lines.forEach((line, lineIdx) => {
-                if (lineIdx === 0 && hasHeader) return;
+                lines.forEach((line, lineIdx) => {
+                    if (lineIdx === 0 && hasHeader) return;
+                    const parts = line.split(/[,\t]/);
+                    if (parts.length < 2 && isNaN(Number(parts[0]))) return;
 
-                const parts = line.split(/[,\t]/);
-                if (parts.length < 2) return;
+                    const inputName = parts[colMap.name] ? parts[colMap.name].trim() : "";
+                    if (!inputName || inputName.includes("品項") || inputName.includes("1kg") || inputName.includes("製作")) return;
 
-                const inputName = parts[colMap.name] ? parts[colMap.name].trim() : "";
-                if (!inputName || inputName.includes("品項") || inputName.includes("1kg") || inputName.includes("製作")) return;
+                    let val1k = (colMap.q1k !== -1 && parts[colMap.q1k]) ? (parseInt(parts[colMap.q1k]) || 0) : 0;
+                    let val300 = (colMap.q300 !== -1 && parts[colMap.q300]) ? (parseInt(parts[colMap.q300]) || 0) : 0;
+                    let val500 = (colMap.q500 !== -1 && parts[colMap.q500]) ? (parseInt(parts[colMap.q500]) || 0) : 0;
+                    let val600 = (colMap.q600 !== -1 && parts[colMap.q600]) ? (parseInt(parts[colMap.q600]) || 0) : 0;
+                    let val5k = (colMap.q5k !== -1 && parts[colMap.q5k]) ? (parseInt(parts[colMap.q5k]) || 0) : 0;
 
-                let val1k = (colMap.q1k !== -1 && parts[colMap.q1k]) ? (parseInt(parts[colMap.q1k]) || 0) : 0;
-                let val300 = (colMap.q300 !== -1 && parts[colMap.q300]) ? (parseInt(parts[colMap.q300]) || 0) : 0;
-                let val5k = (colMap.q5k !== -1 && parts[colMap.q5k]) ? (parseInt(parts[colMap.q5k]) || 0) : 0;
-
-                let customSpecs = [];
-                for (let idx in colMap.custom) {
-                    let qty = parseInt(parts[idx]) || 0;
-                    if (qty > 0) {
-                        customSpecs.push({
-                            text: colMap.custom[idx],
-                            qty: qty
-                        });
+                    let valTrimRaw = (colMap.trim !== -1 && parts[colMap.trim]) ? parts[colMap.trim].trim() : "";
+                    if (valTrimRaw === "true" || valTrimRaw === "V" || valTrimRaw === "v" || valTrimRaw === "1" || valTrimRaw === "是" || valTrimRaw === "*") {
+                        const globalTrim = document.getElementById('globalTrim');
+                        if (globalTrim) globalTrim.checked = true;
                     }
-                }
 
-                let targetRow = null;
-                products.forEach(pKey => {
-                    if (isProductMatch(inputName, pKey)) {
-                        targetRow = document.querySelector(`tr[data-name="${pKey}"]`);
+                    // 如果有自訂規格欄位
+                    let customSpecs = [];
+                    for (let idx in colMap.custom) {
+                        let qty = parseInt(parts[idx]) || 0;
+                        if (qty > 0) {
+                            customSpecs.push({ text: colMap.custom[idx], qty: qty });
+                        }
+                    }
+
+                    // 尋找匹配的品項列
+                    let targetRow = null;
+                    products.forEach(p => {
+                        if (isProductMatch(inputName, p)) {
+                            targetRow = document.querySelector(`tr[data-key="${p.key}"]`);
+                        }
+                    });
+
+                    if (targetRow) {
+                        targetRow.querySelector('.q1k').value = val1k;
+                        targetRow.querySelector('.q300').value = val300;
+                        targetRow.querySelector('.q500').value = val500;
+                        targetRow.querySelector('.q600').value = val600;
+                        targetRow.querySelector('.q5k').value = val5k;
+
+                        if (customSpecs.length > 0) {
+                            targetRow.querySelector('.sText').value = customSpecs[0].text;
+                            targetRow.querySelector('.sQty').value = customSpecs[0].qty;
+                        } else {
+                            targetRow.querySelector('.sText').value = "";
+                            targetRow.querySelector('.sQty').value = 0;
+                        }
+
+                        targetRow.classList.add('row-updated');
+                        setTimeout(() => targetRow.classList.remove('row-updated'), 2000);
+                        count++;
+                    } else if (inputName !== "") {
+                        document.getElementById('blankName').value = inputName;
+                        document.getElementById('blank1k').value = val1k;
+                        document.getElementById('blank300').value = val300;
+                        document.getElementById('blank500').value = val500;
+                        document.getElementById('blank600').value = val600;
+                        document.getElementById('blank5k').value = val5k;
+                        if (customSpecs.length > 0) {
+                            document.getElementById('blankSpecTxt').value = customSpecs[0].text;
+                            document.getElementById('blankSpecQty').value = customSpecs[0].qty;
+                        }
+                        count++;
                     }
                 });
+            }
 
-                if (targetRow) {
-                    targetRow.querySelector('.q1k').value = val1k;
-                    targetRow.querySelector('.q300').value = val300;
-
-                    const q5kInput = targetRow.querySelector('.q5k');
-                    if (q5kInput) {
-                        q5kInput.value = val5k;
-                    }
-
-                    if (customSpecs.length > 0) {
-                        targetRow.querySelector('.sText').value = customSpecs[0].text;
-                        targetRow.querySelector('.sQty').value = customSpecs[0].qty;
-                    } else {
-                        targetRow.querySelector('.sText').value = "";
-                        targetRow.querySelector('.sQty').value = 0;
-                    }
-
-                    targetRow.classList.add('row-updated');
-                    setTimeout(() => targetRow.classList.remove('row-updated'), 2000);
-                    count++;
-                } else if (inputName !== "") {
-                    document.getElementById('blankName').value = inputName;
-                    document.getElementById('blank1k').value = val1k;
-                    document.getElementById('blank300').value = val300;
-                    if (customSpecs.length > 0) {
-                        document.getElementById('blankSpecTxt').value = customSpecs[0].text;
-                        document.getElementById('blankSpecQty').value = customSpecs[0].qty;
-                    } else {
-                        document.getElementById('blankSpecTxt').value = "";
-                        document.getElementById('blankSpecQty').value = 0;
-                    }
-                    count++;
-                }
-            });
+            updateAllInputStyles();
+            updateQuickStats();
 
             if (count > 0) {
-                updateAllInputStyles();
-                showToast(`成功匯入 ${count} 列數據`);
+                showToast(`🎉 成功匯入 ${count} 列製作數據！`);
+                // 自動更新派工與標籤
+                distribute();
                 generatePreview();
             } else {
                 showToast("無法辨識數據，請確認 Excel 選取範圍");
             }
         }
 
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            toast.innerText = msg;
-            toast.style.display = 'block';
-            setTimeout(() => toast.style.display = 'none', 3000);
+        // =========================================================
+        // 🌿 分組派工核心演算系統
+        // =========================================================
+        function distribute() {
+            const pA = parseInt(document.getElementById("peopleA").value) || 1;
+            const pB = parseInt(document.getElementById("peopleB").value) || 1;
+            const pC = parseInt(document.getElementById("peopleC").value) || 1;
+
+            let itemList = [];
+
+            // 讀取標準品項
+            products.forEach((p, rIdx) => {
+                const row = document.querySelector(`tr[data-key="${p.key}"]`);
+                if (!row) return;
+
+                const q1 = parseInt(row.querySelector('.q1k').value) || 0;
+                const q3 = parseInt(row.querySelector('.q300').value) || 0;
+                const q500 = parseInt(row.querySelector('.q500').value) || 0;
+                const q600 = parseInt(row.querySelector('.q600').value) || 0;
+                const q5k = parseInt(row.querySelector('.q5k').value) || 0;
+                const cText = row.querySelector('.sText').value.trim();
+                const cQty = parseInt(row.querySelector('.sQty').value) || 0;
+
+                const specs = [q1, q3, q500, q600, q5k];
+                let rowQty = q1 + q3 + q500 + q600 + q5k + cQty;
+                let rowWeight = (q1 * WEIGHT_FACTORS[0]) + (q3 * WEIGHT_FACTORS[1]) + (q500 * WEIGHT_FACTORS[2]) + (q600 * WEIGHT_FACTORS[3]) + (q5k * WEIGHT_FACTORS[4]);
+
+                if (cQty > 0) {
+                    rowWeight += cQty * 0.5; // 自訂規格預設 0.5kg
+                }
+
+                if (rowQty > 0) {
+                    itemList.push({
+                        name: p.name,
+                        specs: specs,
+                        customText: cText,
+                        customQty: cQty,
+                        totalQty: rowQty,
+                        totalWeight: rowWeight
+                    });
+                }
+            });
+
+            // 讀取手寫新增品項
+            const bName = document.getElementById('blankName').value.trim();
+            if (bName) {
+                const bq1 = parseInt(document.getElementById('blank1k').value) || 0;
+                const bq3 = parseInt(document.getElementById('blank300').value) || 0;
+                const bq500 = parseInt(document.getElementById('blank500').value) || 0;
+                const bq600 = parseInt(document.getElementById('blank600').value) || 0;
+                const bq5k = parseInt(document.getElementById('blank5k').value) || 0;
+                const bTxt = document.getElementById('blankSpecTxt').value.trim();
+                const bQty = parseInt(document.getElementById('blankSpecQty').value) || 0;
+
+                const specs = [bq1, bq3, bq500, bq600, bq5k];
+                let rowQty = bq1 + bq3 + bq500 + bq600 + bq5k + bQty;
+                let rowWeight = (bq1 * WEIGHT_FACTORS[0]) + (bq3 * WEIGHT_FACTORS[1]) + (bq500 * WEIGHT_FACTORS[2]) + (bq600 * WEIGHT_FACTORS[3]) + (bq5k * WEIGHT_FACTORS[4]) + (bQty * 0.5);
+
+                if (rowQty > 0) {
+                    itemList.push({
+                        name: bName,
+                        specs: specs,
+                        customText: bTxt,
+                        customQty: bQty,
+                        totalQty: rowQty,
+                        totalWeight: rowWeight
+                    });
+                }
+            }
+
+            if (itemList.length === 0) {
+                document.getElementById("resultContent").innerHTML = '<div style="color: #888; text-align: center; padding: 30px;">目前表格中沒有任何製作數量！請先輸入或貼上資料。</div>';
+                document.getElementById("versionHint").innerText = "";
+                return;
+            }
+
+            clickCount++;
+            let candidates = [];
+
+            // 蒙地卡羅智慧平衡配法
+            for (let sim = 0; sim < 120; sim++) {
+                let groups = [
+                    { name: "A組", people: pA, totalWeight: 0, totalQty: 0, items: [] },
+                    { name: "B組", people: pB, totalWeight: 0, totalQty: 0, items: [] },
+                    { name: "C組", people: pC, totalWeight: 0, totalQty: 0, items: [] }
+                ];
+
+                let randomizedItems = [...itemList].sort((a, b) => {
+                    let noiseA = a.totalWeight * (0.6 + Math.random() * 0.8);
+                    let noiseB = b.totalWeight * (0.6 + Math.random() * 0.8);
+                    return noiseB - noiseA;
+                });
+
+                randomizedItems.forEach(item => {
+                    let shuffledGroups = [...groups].sort(() => Math.random() - 0.5);
+                    let targetGroup = shuffledGroups[0];
+                    let minAvgWeight = shuffledGroups[0].totalWeight / shuffledGroups[0].people;
+
+                    for (let i = 1; i < shuffledGroups.length; i++) {
+                        let curAvgWeight = shuffledGroups[i].totalWeight / shuffledGroups[i].people;
+                        if (curAvgWeight < minAvgWeight) {
+                            minAvgWeight = curAvgWeight;
+                            targetGroup = shuffledGroups[i];
+                        }
+                    }
+
+                    targetGroup.items.push(item);
+                    targetGroup.totalWeight += item.totalWeight;
+                    targetGroup.totalQty += item.totalQty;
+                });
+
+                let loads = groups.map(g => g.totalWeight / g.people);
+                let diff = Math.max(...loads) - Math.min(...loads);
+                let signature = groups.map(g => g.name + ":" + g.items.map(i => i.name).sort().join(",")).join("|");
+
+                candidates.push({ groups, diff, signature });
+            }
+
+            candidates.sort((a, b) => a.diff - b.diff);
+
+            let topPool = candidates.slice(0, Math.max(8, Math.floor(candidates.length * 0.35)));
+            let freshPool = topPool.filter(c => !historySignatures.includes(c.signature));
+
+            let selected = freshPool.length > 0
+                ? freshPool[Math.floor(Math.random() * freshPool.length)]
+                : topPool[Math.floor(Math.random() * topPool.length)];
+
+            historySignatures.push(selected.signature);
+            if (historySignatures.length > 5) historySignatures.shift();
+
+            document.getElementById("versionHint").innerText = `🔄 第 ${clickCount} 次隨機配法 (人均差距僅 ${selected.diff.toFixed(1)} kg)`;
+            renderResult(selected.groups);
         }
 
+        // 渲染派工結果表格
+        function renderResult(groups) {
+            const outDiv = document.getElementById("resultContent");
+            outDiv.innerHTML = "";
+
+            const today = new Date();
+            const dateTitle = document.createElement("div");
+            dateTitle.style.cssText = "font-size: 16px; font-weight: bold; margin-bottom: 12px; color: #2c3e50;";
+            dateTitle.innerText = `📅 製作派工明細 (${today.getMonth() + 1}/${today.getDate()})`;
+            outDiv.appendChild(dateTitle);
+
+            groups.forEach(g => {
+                const avgW = (g.totalWeight / g.people).toFixed(1);
+                const groupEl = document.createElement("div");
+                groupEl.className = "result-group";
+
+                let html = `
+                    <div class="group-header">
+                        <span>🏷️ ${g.name} (${g.people} 人)</span>
+                        <span>總重: ${g.totalWeight.toFixed(1)} kg 【人均: ${avgW} kg】 | 總包數: ${g.totalQty} 包</span>
+                    </div>
+                    <table class="result-table">
+                        <thead>
+                            <tr>
+                                <th style="text-align:left; width:28%;">分配品項</th>
+                                <th>1kg/包</th>
+                                <th>300g/包</th>
+                                <th>500g/包</th>
+                                <th>600g/包</th>
+                                <th>5K/箱</th>
+                                <th>該品總重</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                if (g.items.length === 0) {
+                    html += `<tr><td colspan="7" style="color:#999;">本日無分派品項</td></tr>`;
+                } else {
+                    g.items.forEach(it => {
+                        html += `
+                            <tr>
+                                <td class="item-name">${it.name}</td>
+                                <td>${it.specs[0] || '-'}</td>
+                                <td>${it.specs[1] || '-'}</td>
+                                <td>${it.specs[2] || '-'}</td>
+                                <td>${it.specs[3] || '-'}</td>
+                                <td>${it.specs[4] || '-'}</td>
+                                <td style="font-weight:bold;">${it.totalWeight.toFixed(1)} kg</td>
+                            </tr>
+                        `;
+                    });
+                }
+
+                html += `</tbody></table>`;
+                groupEl.innerHTML = html;
+                outDiv.appendChild(groupEl);
+            });
+        }
+
+        // 一鍵複製圖片傳 LINE (使用 html2canvas 截圖並寫入剪貼簿)
+        async function copyTableAsImage() {
+            const captureEl = document.getElementById("captureArea");
+            if (captureEl.querySelector(".result-table") === null) {
+                showToast("請先產生派工表格後再複製圖片！");
+                return;
+            }
+
+            try {
+                const canvas = await html2canvas(captureEl, { scale: 2, backgroundColor: "#ffffff" });
+                canvas.toBlob(async (blob) => {
+                    try {
+                        const item = new ClipboardItem({ "image/png": blob });
+                        await navigator.clipboard.write([item]);
+                        alert("📸 派工表格圖片已成功複製！\n請直接開啟 LINE 對話框按 Ctrl+V 貼上發送。");
+                    } catch (e) {
+                        const link = document.createElement("a");
+                        link.download = `生菜派工單_${new Date().toISOString().slice(0, 10)}.png`;
+                        link.href = canvas.toDataURL();
+                        link.click();
+                        alert("已為您下載派工單圖片，可直接將圖片拖曳至 LINE 發送！");
+                    }
+                });
+            } catch (err) {
+                alert("截圖失敗，請稍後再試。");
+            }
+        }
+
+        // =========================================================
+        // 🏷️ 標籤管理與列印系統 (保留 100% 原有格式)
+        // =========================================================
         function applyBatchMonth() {
             const m = document.getElementById('batchMonth').value;
             document.querySelectorAll('.row-month').forEach(s => s.value = m);
-        }
-
-        function clearNumbers() {
-            if (!confirm("確定要重置所有內容嗎？")) return;
-            document.querySelectorAll('input[type="number"]').forEach(i => i.value = 0);
-            document.querySelectorAll('input[type="text"]').forEach(i => i.value = "");
-            document.querySelectorAll('.row-month').forEach(s => s.selectedIndex = 0);
-            document.getElementById('batchMonth').selectedIndex = 0;
-            document.getElementById('printArea').innerHTML = "";
-            updateAllInputStyles();
-            showToast("已重置所有內容(含月份)");
+            generatePreview();
         }
 
         function generatePreview() {
             const mode = document.getElementById('labelMode').value;
             const pDate = document.getElementById('packDate').value.split('-').slice(1).join('/');
+            const isGlobalTrim = document.getElementById('globalTrim') ? document.getElementById('globalTrim').checked : false;
             const printArea = document.getElementById('printArea');
             printArea.innerHTML = "";
 
             document.querySelectorAll('#tableBody tr').forEach(row => {
-                const name = row.querySelector('.product-name').innerText;
+                const pKey = row.getAttribute('data-key');
+                const productObj = products.find(p => p.key === pKey);
+                const name = productObj ? (productObj.labelName || productObj.name) : row.querySelector('.item-name').innerText;
+
                 const mVal = row.querySelector('.row-month').value;
                 const sMonth = mVal ? mVal : "　";
 
                 const q1 = parseInt(row.querySelector('.q1k').value) || 0;
                 const q3 = parseInt(row.querySelector('.q300').value) || 0;
-
-                const q5Input = row.querySelector('.q5k');
-                const q5 = q5Input ? (parseInt(q5Input.value) || 0) : 0;
+                const q500 = parseInt(row.querySelector('.q500').value) || 0;
+                const q600 = parseInt(row.querySelector('.q600').value) || 0;
+                const q5k = parseInt(row.querySelector('.q5k').value) || 0;
 
                 const customTxt = row.querySelector('.sText').value || "自訂規格";
                 const customQty = parseInt(row.querySelector('.sQty').value) || 0;
                 const qS = parseInt(row.querySelector('.qSample').value) || 0;
 
-                renderLabels(printArea, mode, name, q1, q3, q5, customTxt, customQty, qS, sMonth, pDate);
+                renderLabels(printArea, mode, name, q1, q3, q500, q600, q5k, customTxt, customQty, qS, sMonth, pDate, isGlobalTrim);
             });
 
-            const bName = document.getElementById('blankName').value;
+            // 手寫自訂品項
+            const bName = document.getElementById('blankName').value.trim();
             if (bName) {
                 const bmVal = document.getElementById('blankMonth').value;
                 const bsMonth = bmVal ? bmVal : "　";
 
                 const bq1 = parseInt(document.getElementById('blank1k').value) || 0;
                 const bq3 = parseInt(document.getElementById('blank300').value) || 0;
+                const bq500 = parseInt(document.getElementById('blank500').value) || 0;
+                const bq600 = parseInt(document.getElementById('blank600').value) || 0;
+                const bq5k = parseInt(document.getElementById('blank5k').value) || 0;
                 const bTxt = document.getElementById('blankSpecTxt').value || "自訂規格";
                 const bQty = parseInt(document.getElementById('blankSpecQty').value) || 0;
                 const bqS = parseInt(document.getElementById('blankSample').value) || 0;
-                renderLabels(printArea, mode, bName, bq1, bq3, 0, bTxt, bQty, bqS, bsMonth, pDate);
-            }
 
-            printArea.scrollIntoView({ behavior: 'smooth' });
+                renderLabels(printArea, mode, bName, bq1, bq3, bq500, bq600, bq5k, bTxt, bQty, bqS, bsMonth, pDate, isGlobalTrim);
+            }
         }
 
-        function renderLabels(area, mode, name, q1, q3, q5, cTxt, cQty, qS, m, d) {
+        function renderLabels(area, mode, name, q1, q3, q500, q600, q5k, cTxt, cQty, qS, m, d, isTrimmed = false) {
             if (mode === 'spec') {
-                for (let i = 0; i < q1; i++) area.innerHTML += createSpec(name, "1K");
-                for (let i = 0; i < q3; i++) area.innerHTML += createSpec(name, "300g");
-                for (let i = 0; i < q5; i++) area.innerHTML += createSpec(name, "5KG/件");
-                for (let i = 0; i < cQty; i++) area.innerHTML += createSpec(name, cTxt);
-                for (let i = 0; i < qS; i++) area.innerHTML += createSpec(name, "樣品");
+                for (let i = 0; i < q1; i++) area.innerHTML += createSpec(name, "1K", isTrimmed);
+                for (let i = 0; i < q3; i++) area.innerHTML += createSpec(name, "300g", isTrimmed);
+                for (let i = 0; i < q500; i++) area.innerHTML += createSpec(name, "500g", isTrimmed);
+                for (let i = 0; i < q600; i++) area.innerHTML += createSpec(name, "600g", isTrimmed);
+                for (let i = 0; i < q5k; i++) area.innerHTML += createSpec(name, "5KG/件", isTrimmed);
+                for (let i = 0; i < cQty; i++) area.innerHTML += createSpec(name, cTxt, isTrimmed);
+                for (let i = 0; i < qS; i++) area.innerHTML += createSpec(name, "樣品", isTrimmed);
             } else {
                 addBoxLabels(area, name, q1, 3, "1KG", m, d);
                 addBoxLabels(area, name, q3, 10, "300G", m, d);
-                for (let i = 0; i < q5; i++) area.innerHTML += createBox(name, "5KG/件", m, d);
+                for (let i = 0; i < q500; i++) area.innerHTML += createBox(name, "500g", m, d);
+                for (let i = 0; i < q600; i++) area.innerHTML += createBox(name, "600g", m, d);
+                for (let i = 0; i < q5k; i++) area.innerHTML += createBox(name, "5KG/件", m, d);
                 if (cQty > 0) {
                     for (let i = 0; i < cQty; i++) area.innerHTML += createBox(name, cTxt, m, d);
                 }
@@ -849,6 +1541,7 @@
             if (rem > 0) area.innerHTML += createBox(name, `${unit}*${rem}包`, m, d);
         }
 
+        // 動態字級縮放演算法
         function getFontSizeForWidth(text, maxWidth, baseSize, bold = true) {
             const canvas = document.createElement('canvas');
             const context = canvas.getContext('2d');
@@ -863,36 +1556,39 @@
             return `${size}pt`;
         }
 
+        // 建立外箱標籤 (84.9x62.4mm)
         function createBox(n, s, m, d) {
             const specFontSize = getFontSizeForWidth(s, 240, 36);
             const nameFontSize = getFontSizeForWidth(n, 220, 32);
 
             return `<div class="label-page box-size box-label">
-            <div class="top-row">
-                <div class="date-area">
-                    原料日期：${m}  / <br>
-                    製作日期：${d}  
+                <div class="top-row">
+                    <div class="date-area">
+                        原料日期：${m}  / <br>
+                        製作日期：${d}  
+                    </div>
                 </div>
-            </div>
-            
-            <div class="spec-main" style="font-size: ${specFontSize}">
-                ${s}
-            </div>
-            
-            <div class="footer-name">
-                <div class="name-border" style="font-size: ${nameFontSize}">
-                    ${n}
+                
+                <div class="spec-main" style="font-size: ${specFontSize}">
+                    ${s}
                 </div>
-            </div>
-        </div>`;
+                
+                <div class="footer-name">
+                    <div class="name-border" style="font-size: ${nameFontSize}">
+                        ${n}
+                    </div>
+                </div>
+            </div>`;
         }
 
-        // --- 品規格式優化 (不溢出/不重疊) ---
-        function createSpec(n, s) {
+        // 建立品規標籤 (35x25mm)
+        function createSpec(n, s, isTrimmed = false) {
             let displayName = n;
-            // 1. 品名分行處理
+            // 品名分行處理
             if (n.includes("［")) {
                 displayName = n.replace("［", "<br>［");
+            } else if (n.includes("[")) {
+                displayName = n.replace("[", "<br>[");
             } else if (n.length > 5) {
                 const mid = Math.ceil(n.length / 2);
                 displayName = n.substring(0, mid) + "<br>" + n.substring(mid);
@@ -901,23 +1597,54 @@
             const lines = displayName.split("<br>");
             const longestLine = lines.reduce((a, b) => a.length > b.length ? a : b);
 
-            // 2. 品名縮放 (空間限制更嚴格)
             const nameFontSize = getFontSizeForWidth(longestLine, 120, 18);
-
-            // 3. 規格縮放 (確保 nowrap 且字級在安全範圍內)
-            // 寬度限制設為 128px (35mm扣除內距)，基準縮小5% (20.9)，確保絕對不溢出
             const specBigFontSize = getFontSizeForWidth(s, 128, 20.9);
+            const trimMarkHTML = isTrimmed ? `<div class="trim-mark">*</div>` : '';
 
             return `<div class="label-page spec-size spec-label">
-            <div class="name-top" style="font-size: ${nameFontSize}">${displayName}</div>
-            <div class="spec-big" style="font-size: ${specBigFontSize}"><span>${s}</span></div>
-        </div>`;
+                <div class="name-top" style="font-size: ${nameFontSize}">${displayName}</div>
+                <div class="spec-big" style="font-size: ${specBigFontSize}"><span>${s}</span></div>
+                ${trimMarkHTML}
+            </div>`;
         }
 
-        // 監聽列印前事件，當使用者按 Ctrl+P 或觸發列印時，自動重新產生最新資料的預覽
-        window.addEventListener('beforeprint', generatePreview);
-    </script>
+        // 一鍵清空
+        function clearAllData() {
+            if (!confirm("確定要清空所有人數、製作數量輸入與分配結果嗎？")) return;
+            document.getElementById("peopleA").value = "3";
+            document.getElementById("peopleB").value = "2";
+            document.getElementById("peopleC").value = "3";
+            document.getElementById("pasteInput").value = "";
+            document.querySelectorAll('input[type="number"]').forEach(i => i.value = 0);
+            document.querySelectorAll('input[type="text"]').forEach(i => i.value = "");
+            document.querySelectorAll('.row-month').forEach(s => s.selectedIndex = 0);
+            const globalTrim = document.getElementById('globalTrim');
+            if (globalTrim) globalTrim.checked = false;
+            document.getElementById('batchMonth').selectedIndex = 0;
+            document.getElementById("versionHint").innerText = "";
+            document.getElementById("resultContent").innerHTML = '<div style="color: #888; text-align: center; padding: 30px;">已清空所有資料。</div>';
+            document.getElementById('printArea').innerHTML = "";
+            historySignatures = [];
+            clickCount = 0;
+            updateAllInputStyles();
+            updateQuickStats();
+            showToast("已清空所有資料！");
+        }
 
+        // Toast 提示
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.style.display = 'block';
+            setTimeout(() => toast.style.display = 'none', 3000);
+        }
+
+        // 監聽列印前事件
+        window.addEventListener('beforeprint', generatePreview);
+
+        // 頁面加載完成初始化
+        window.onload = initTable;
+    </script>
 </body>
 
 </html>

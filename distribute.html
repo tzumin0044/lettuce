@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>生菜製作分組派工系統</title>
+  <!-- 引入截圖套件 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Microsoft JhengHei", sans-serif; }
+    body { padding: 20px; background-color: #f4f6f8; color: #333; margin: 0; }
+    .container { max-width: 950px; margin: 0 auto; background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    h2, h3 { margin-top: 0; color: #2c3e50; }
+    
+    /* 上方面板 */
+    .top-panel { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 12px 15px; background: #eef2f5; border-radius: 6px; }
+    button { padding: 8px 16px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 14px; }
+    
+    .btn-paste { background: #8e44ad; color: white; }
+    .btn-paste:hover { background: #732d91; }
+    .btn-run { background: #27ae60; color: white; }
+    .btn-run:hover { background: #219150; }
+    .btn-copy-img { background: #00c300; color: white; }
+    .btn-copy-img:hover { background: #009900; }
+    .btn-clear { background: #e74c3c; color: white; }
+    .btn-clear:hover { background: #c0392b; }
+
+    /* 快捷貼上文字框 */
+    .paste-box-area { margin-bottom: 15px; padding: 10px 15px; background: #fdfefe; border: 1px dashed #bdc3c7; border-radius: 6px; }
+    .paste-box-area textarea { width: 100%; height: 45px; padding: 8px; border: 1px solid #ccd1d9; border-radius: 4px; resize: vertical; font-size: 13px; }
+
+    /* 表格樣式 */
+    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px; background: #fff; }
+    th, td { border: 1px solid #dcdcdc; padding: 6px 8px; text-align: center; }
+    th { background-color: #f8f9fa; font-weight: bold; }
+    .th-orange { background-color: #fce5cd; }
+    .th-green { background-color: #d9ead3; }
+    .th-misc { background-color: #e6b8af; }
+    .item-name { text-align: left; font-weight: 500; }
+    .special-row { background-color: #cfe2f3; }
+    input.qty-input { width: 100%; border: 1px solid transparent; background: transparent; text-align: center; font-size: 14px; padding: 4px 0; }
+    input.qty-input:focus { border: 1px solid #3498db; background: #fff; outline: none; border-radius: 2px; }
+
+    /* 下方結果區控制面板 */
+    .result-control-panel { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 12px; padding: 12px 15px; background: #eef2f5; border-radius: 6px; }
+    .group-inputs { display: flex; gap: 15px; align-items: center; }
+    .group-inputs label { font-weight: bold; display: flex; align-items: center; gap: 6px; font-size: 14px; }
+    .group-inputs input { width: 55px; padding: 5px; border: 1px solid #ccc; border-radius: 4px; text-align: center; }
+    .btn-group { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+    /* 產出表格專用區塊 */
+    #captureArea { padding: 15px; background: #ffffff; border: 1px solid #e1e8ed; border-radius: 6px; }
+    .result-group { margin-bottom: 20px; }
+    .result-group:last-child { margin-bottom: 0; }
+    .group-header { background: #d9ead3; font-weight: bold; padding: 8px 12px; border: 1px solid #b6d7a8; border-bottom: none; display: flex; justify-content: space-between; font-size: 14px; }
+    .result-table th { background: #f3f3f3; }
+    .result-table td { font-size: 13px; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>🌿 生菜製作分組派工系統</h2>
+  
+  <!-- 頂部僅保留一鍵貼上 -->
+  <div class="top-panel">
+    <span style="font-weight: bold; color: #2c3e50;">📋 製作數量輸入</span>
+    <button class="btn-paste" onclick="pasteFromClipboard()">📋 一鍵貼上資料</button>
+  </div>
+
+  <!-- 快捷貼上輸入區 -->
+  <div class="paste-box-area">
+    <textarea id="pasteInput" placeholder="複製 Excel 製作數量區塊後貼入此處，系統會自動填入下方表格..."></textarea>
+  </div>
+
+  <!-- 輸入表格 -->
+  <div id="input-section">
+    <table id="mainTable">
+      <thead>
+        <tr>
+          <th rowspan="2" style="width: 28%;">品項</th>
+          <th class="th-orange">橘苔</th>
+          <th class="th-green">綠苔</th>
+          <th colspan="2" class="th-misc">雜苔</th>
+          <th>箱裝</th>
+        </tr>
+        <tr>
+          <th>1kg/包</th>
+          <th>300g/包</th>
+          <th>500g/包</th>
+          <th>600g/包</th>
+          <th>5K/箱</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+  <!-- 派工明細結果區：標題與提示 -->
+  <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
+    <h3 style="margin: 0;">📋 分組派工明細結果</h3>
+    <span id="versionHint" style="font-size: 13px; color: #27ae60; font-weight: bold;"></span>
+  </div>
+
+  <!-- 派工明細操作控制列 -->
+  <div class="result-control-panel">
+    <div class="group-inputs">
+      <label>A組人數: <input type="number" id="peopleA" value="3" min="1"></label>
+      <label>B組人數: <input type="number" id="peopleB" value="2" min="1"></label>
+      <label>C組人數: <input type="number" id="peopleC" value="3" min="1"></label>
+    </div>
+    <div class="btn-group">
+      <button class="btn-run" onclick="distribute()">🎲 隨機換下一組配法</button>
+      <button class="btn-copy-img" onclick="copyTableAsImage()">📸 一鍵複製圖片傳 LINE</button>
+      <button class="btn-clear" onclick="clearAll()">🗑️ 一鍵清空</button>
+    </div>
+  </div>
+
+  <!-- 產出表格截圖區塊 -->
+  <div id="captureArea">
+    <div id="resultContent" style="color: #888; text-align: center; padding: 25px;">
+      尚未執行分配，請確認上方製作數量與人數後點擊「🎲 隨機換下一組配法」。
+    </div>
+  </div>
+</div>
+
+<script>
+  let historySignatures = [];
+  let clickCount = 0;
+
+  const items = [
+    { name: "紅捲生菜", special: false },
+    { name: "綠捲鬚生菜", special: false },
+    { name: "紅橡木生菜", special: false },
+    { name: "綠橡木生菜", special: false },
+    { name: "紅火焰生菜", special: false },
+    { name: "綠火焰生菜", special: false },
+    { name: "紅蘿蔓", special: false },
+    { name: "波士頓奶油生菜", special: false },
+    { name: "羽衣甘藍", special: false },
+    { name: "巴西里 [平葉]", special: false },
+    { name: "巴西里 [捲葉]", special: false },
+    { name: "紅包心生菜", special: false },
+    { name: "紅甜脆生菜 [水耕]", special: false },
+    { name: "綠甜脆生菜 [水耕]", special: false },
+    { name: "綠水晶生菜 [水耕]", special: false },
+    { name: "廣東生菜", special: false },
+    { name: "綠火焰生菜 (雜苔/特)", special: true },
+    { name: "綠火焰生菜[水耕] (雜苔/特)", special: true }
+  ];
+
+  const WEIGHT_FACTORS = [1.0, 0.3, 0.5, 0.6, 5.0];
+
+  function initTable() {
+    const tbody = document.getElementById("tableBody");
+    tbody.innerHTML = "";
+    items.forEach((item, idx) => {
+      const tr = document.createElement("tr");
+      if (item.special) tr.className = "special-row";
+      
+      let html = `<td class="item-name">${item.name}</td>`;
+      for (let c = 0; c < 5; c++) {
+        html += `<td><input type="number" min="0" class="qty-input" data-row="${idx}" data-col="${c}"></td>`;
+      }
+      tr.innerHTML = html;
+      tbody.appendChild(tr);
+    });
+
+    document.getElementById("pasteInput").addEventListener("input", function() {
+      parseAndFillData(this.value);
+      this.value = "";
+    });
+  }
+
+  async function pasteFromClipboard() {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (!text || text.trim() === "") {
+        alert("剪貼簿目前沒有內容！請先在 Excel 複製製作數量。");
+        return;
+      }
+      parseAndFillData(text);
+    } catch (err) {
+      document.getElementById("pasteInput").focus();
+    }
+  }
+
+  function parseAndFillData(rawText) {
+    const rows = rawText.split(/\r\n|\n|\r/).filter(r => r.trim().length > 0);
+    if (rows.length === 0) return;
+
+    document.querySelectorAll(".qty-input").forEach(input => input.value = "");
+
+    rows.forEach((rowStr, rIdx) => {
+      if (rIdx >= items.length) return;
+      let cols = rowStr.split('\t').map(c => c.trim());
+      if (cols.length > 5 && isNaN(Number(cols[0]))) {
+        cols = cols.slice(cols.length - 5);
+      }
+
+      cols.forEach((val, cIdx) => {
+        if (cIdx < 5) {
+          const input = document.querySelector(`input[data-row="${rIdx}"][data-col="${cIdx}"]`);
+          if (input) {
+            const num = parseInt(val);
+            input.value = (!isNaN(num) && num > 0) ? num : (val === "0" ? "0" : "");
+          }
+        }
+      });
+    });
+
+    alert("製作數量已成功填入！");
+  }
+
+  function distribute() {
+    const pA = parseInt(document.getElementById("peopleA").value) || 1;
+    const pB = parseInt(document.getElementById("peopleB").value) || 1;
+    const pC = parseInt(document.getElementById("peopleC").value) || 1;
+
+    let itemList = [];
+
+    items.forEach((item, rIdx) => {
+      let rowQty = 0;
+      let rowWeight = 0;
+      let specs = [];
+
+      for (let c = 0; c < 5; c++) {
+        const input = document.querySelector(`input[data-row="${rIdx}"][data-col="${c}"]`);
+        const val = parseInt(input.value) || 0;
+        specs.push(val);
+        rowQty += val;
+        rowWeight += val * WEIGHT_FACTORS[c];
+      }
+
+      if (rowQty > 0) {
+        itemList.push({
+          name: item.name,
+          specs: specs,
+          totalQty: rowQty,
+          totalWeight: rowWeight
+        });
+      }
+    });
+
+    if (itemList.length === 0) {
+      alert("目前表格中沒有任何製作數量！");
+      return;
+    }
+
+    clickCount++;
+    let candidates = [];
+
+    for (let sim = 0; sim < 100; sim++) {
+      let groups = [
+        { name: "A組", people: pA, totalWeight: 0, totalQty: 0, items: [] },
+        { name: "B組", people: pB, totalWeight: 0, totalQty: 0, items: [] },
+        { name: "C組", people: pC, totalWeight: 0, totalQty: 0, items: [] }
+      ];
+
+      let randomizedItems = [...itemList].sort((a, b) => {
+        let noiseA = a.totalWeight * (0.6 + Math.random() * 0.8);
+        let noiseB = b.totalWeight * (0.6 + Math.random() * 0.8);
+        return noiseB - noiseA;
+      });
+
+      randomizedItems.forEach(item => {
+        let shuffledGroups = [...groups].sort(() => Math.random() - 0.5);
+        let targetGroup = shuffledGroups[0];
+        let minAvgWeight = shuffledGroups[0].totalWeight / shuffledGroups[0].people;
+
+        for (let i = 1; i < shuffledGroups.length; i++) {
+          let curAvgWeight = shuffledGroups[i].totalWeight / shuffledGroups[i].people;
+          if (curAvgWeight < minAvgWeight) {
+            minAvgWeight = curAvgWeight;
+            targetGroup = shuffledGroups[i];
+          }
+        }
+
+        targetGroup.items.push(item);
+        targetGroup.totalWeight += item.totalWeight;
+        targetGroup.totalQty += item.totalQty;
+      });
+
+      let loads = groups.map(g => g.totalWeight / g.people);
+      let diff = Math.max(...loads) - Math.min(...loads);
+      let signature = groups.map(g => g.name + ":" + g.items.map(i => i.name).sort().join(",")).join("|");
+
+      candidates.push({ groups, diff, signature });
+    }
+
+    candidates.sort((a, b) => a.diff - b.diff);
+
+    let topPool = candidates.slice(0, Math.max(8, Math.floor(candidates.length * 0.35)));
+    let freshPool = topPool.filter(c => !historySignatures.includes(c.signature));
+
+    let selected = freshPool.length > 0 
+      ? freshPool[Math.floor(Math.random() * freshPool.length)]
+      : topPool[Math.floor(Math.random() * topPool.length)];
+
+    historySignatures.push(selected.signature);
+    if (historySignatures.length > 5) historySignatures.shift();
+
+    document.getElementById("versionHint").innerText = `🔄 第 ${clickCount} 次隨機配法 (人均差距 ${selected.diff.toFixed(1)} kg)`;
+
+    renderResult(selected.groups);
+  }
+
+  function renderResult(groups) {
+    const outDiv = document.getElementById("resultContent");
+    outDiv.innerHTML = "";
+
+    const today = new Date();
+    const dateTitle = document.createElement("div");
+    dateTitle.style.cssText = "font-size: 16px; font-weight: bold; margin-bottom: 12px; color: #2c3e50;";
+    dateTitle.innerText = `📅 製作派工明細 (${today.getMonth() + 1}/${today.getDate()})`;
+    outDiv.appendChild(dateTitle);
+
+    groups.forEach(g => {
+      const avgW = (g.totalWeight / g.people).toFixed(1);
+      const groupEl = document.createElement("div");
+      groupEl.className = "result-group";
+
+      let html = `
+        <div class="group-header">
+          <span>🏷️ ${g.name} (${g.people} 人)</span>
+          <span>總重: ${g.totalWeight.toFixed(1)} kg 【人均: ${avgW} kg】 | 總包數: ${g.totalQty} 包</span>
+        </div>
+        <table class="result-table">
+          <thead>
+            <tr>
+              <th style="text-align:left; width:30%;">分配品項</th>
+              <th>1kg/包</th>
+              <th>300g/包</th>
+              <th>500g/包</th>
+              <th>600g/包</th>
+              <th>5K/箱</th>
+              <th>該品總重</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      if (g.items.length === 0) {
+        html += `<tr><td colspan="7" style="color:#999;">本日無分派品項</td></tr>`;
+      } else {
+        g.items.forEach(it => {
+          html += `
+            <tr>
+              <td class="item-name">${it.name}</td>
+              <td>${it.specs[0] || '-'}</td>
+              <td>${it.specs[1] || '-'}</td>
+              <td>${it.specs[2] || '-'}</td>
+              <td>${it.specs[3] || '-'}</td>
+              <td>${it.specs[4] || '-'}</td>
+              <td style="font-weight:bold;">${it.totalWeight.toFixed(1)} kg</td>
+            </tr>
+          `;
+        });
+      }
+
+      html += `</tbody></table>`;
+      groupEl.innerHTML = html;
+      outDiv.appendChild(groupEl);
+    });
+  }
+
+  async function copyTableAsImage() {
+    const captureEl = document.getElementById("captureArea");
+    if (captureEl.querySelector(".result-table") === null) {
+      alert("請先點擊「🎲 隨機換下一組配法」產生表格後再複製圖片！");
+      return;
+    }
+
+    try {
+      const canvas = await html2canvas(captureEl, { scale: 2, backgroundColor: "#ffffff" });
+      canvas.toBlob(async (blob) => {
+        try {
+          const item = new ClipboardItem({ "image/png": blob });
+          await navigator.clipboard.write([item]);
+          alert("📸 派工表格圖片已成功複製！\n請直接開啟 LINE 對話框按 Ctrl+V 貼上發送。");
+        } catch (e) {
+          const link = document.createElement("a");
+          link.download = `生菜派工單_${new Date().toISOString().slice(0,10)}.png`;
+          link.href = canvas.toDataURL();
+          link.click();
+          alert("已自動下載派工單圖片，可直接將圖片拖曳至 LINE 發送！");
+        }
+      });
+    } catch (err) {
+      alert("截圖失敗，請稍後再試。");
+    }
+  }
+
+  function clearAll() {
+    if (!confirm("確定要清空所有人數、製作數量輸入與分配結果嗎？")) return;
+    document.getElementById("peopleA").value = "";
+    document.getElementById("peopleB").value = "";
+    document.getElementById("peopleC").value = "";
+    document.getElementById("pasteInput").value = "";
+    document.querySelectorAll(".qty-input").forEach(input => input.value = "");
+    document.getElementById("versionHint").innerText = "";
+    document.getElementById("resultContent").innerHTML = '<div style="color: #888; text-align: center; padding: 25px;">已清空所有資料。</div>';
+    historySignatures = [];
+    clickCount = 0;
+  }
+
+  window.onload = initTable;
+</script>
+</body>
+</html>
