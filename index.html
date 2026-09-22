@@ -108,6 +108,32 @@
             background: rgba(255, 255, 255, 0.25);
         }
 
+        .top-solar-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 0 10px;
+            height: 32px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 700;
+            color: white;
+            white-space: nowrap;
+            user-select: none;
+        }
+
+        .top-solar-badge .solar-num {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 7px;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            color: #ffd166;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+
         .topbar-btn {
             height: 32px;
             padding: 0 12px;
@@ -572,13 +598,31 @@
             position: relative;
         }
 
+        .spec-label .solar-day-badge {
+            position: absolute;
+            top: 0.8mm;
+            right: 1.2mm;
+            font-size: 8.5pt;
+            font-weight: 900;
+            letter-spacing: -0.2px;
+            border: 1.2px solid black;
+            padding: 0.5px 2.5px;
+            border-radius: 2px;
+            background: white;
+            line-height: 1.1;
+            display: inline-block;
+            pointer-events: none;
+            z-index: 2;
+        }
+
         .spec-label .trim-mark {
             position: absolute;
             bottom: 0.5mm;
             right: 1.5mm;
-            font-size: 16pt;
+            font-size: 15pt;
+            line-height: 0.7;
             font-weight: 900;
-            line-height: 1;
+            pointer-events: none;
         }
 
         .spec-label .name-top {
@@ -644,9 +688,12 @@
             </div>
 
             <div class="topbar-controls">
-                <div class="top-ctrl-item" title="製作日期">
+                <div class="top-ctrl-item" title="製作日期與太陽日">
                     <span style="font-size: 14px;">📅</span>
-                    <input type="date" id="packDate">
+                    <input type="date" id="packDate" onchange="onDateChange()">
+                    <span id="topSolarBadge" class="top-solar-badge" title="太陽日（一年當中的第幾天）">
+                        ☀️ 太陽日 <span id="topSolarNum" class="solar-num">--</span>
+                    </span>
                 </div>
 
                 <div class="top-ctrl-item" title="原料月份">
@@ -816,8 +863,43 @@
     <div id="toast" class="toast">數據已成功匯入！</div>
 
     <script>
+        // 計算太陽日代碼 (日期後兩碼 + 星期開頭英文字母，例：9/22 星期二 => 22T)
+        function getSolarDayCode(dateStr) {
+            if (!dateStr) return "";
+            const parts = dateStr.split('-');
+            if (parts.length < 3) return "";
+            const y = parseInt(parts[0], 10);
+            const m = parseInt(parts[1], 10);
+            const d = parseInt(parts[2], 10);
+            if (isNaN(y) || isNaN(m) || isNaN(d)) return "";
+            
+            // 0: 日(S), 1: 一(M), 2: 二(T), 3: 三(W), 4: 四(T), 5: 五(F), 6: 六(S)
+            const date = new Date(y, m - 1, d);
+            const dayOfWeek = date.getDay();
+            const weekdayMap = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+            const weekLetter = weekdayMap[dayOfWeek] || "";
+            const dayStr = String(d).padStart(2, '0');
+            return `${dayStr}${weekLetter}`;
+        }
+        const getDayOfYear = getSolarDayCode;
+
+        function updateSolarDayDisplay() {
+            const dateVal = document.getElementById('packDate').value;
+            const solarDay = getSolarDayCode(dateVal);
+            const numEl = document.getElementById('topSolarNum');
+            if (numEl) {
+                numEl.innerText = solarDay ? solarDay : "--";
+            }
+        }
+
+        function onDateChange() {
+            updateSolarDayDisplay();
+            generatePreview();
+        }
+
         // 設定今日日期
         document.getElementById('packDate').value = new Date().toISOString().split('T')[0];
+        updateSolarDayDisplay();
 
         // 完整品項定義 (整合派工與標籤兩邊所有品項與規格特徵)
         const products = [
@@ -908,6 +990,7 @@
 
             updateAllInputStyles();
             updateQuickStats();
+            updateSolarDayDisplay();
         }
 
         // 展開/收合備用文字貼上輸入框
@@ -1462,9 +1545,12 @@
             generatePreview();
         }
 
+
         function generatePreview() {
             const mode = document.getElementById('labelMode').value;
-            const pDate = document.getElementById('packDate').value.split('-').slice(1).join('/');
+            const packDateVal = document.getElementById('packDate').value;
+            const pDate = packDateVal ? packDateVal.split('-').slice(1).join('/') : "";
+            const solarDay = getSolarDayCode(packDateVal);
             const isGlobalTrim = document.getElementById('globalTrim') ? document.getElementById('globalTrim').checked : false;
             const printArea = document.getElementById('printArea');
             printArea.innerHTML = "";
@@ -1487,7 +1573,7 @@
                 const customQty = parseInt(row.querySelector('.sQty').value) || 0;
                 const qS = parseInt(row.querySelector('.qSample').value) || 0;
 
-                renderLabels(printArea, mode, name, q1, q3, q500, q600, q5k, customTxt, customQty, qS, sMonth, pDate, isGlobalTrim);
+                renderLabels(printArea, mode, name, q1, q3, q500, q600, q5k, customTxt, customQty, qS, sMonth, pDate, isGlobalTrim, solarDay);
             });
 
             // 手寫自訂品項
@@ -1505,19 +1591,19 @@
                 const bQty = parseInt(document.getElementById('blankSpecQty').value) || 0;
                 const bqS = parseInt(document.getElementById('blankSample').value) || 0;
 
-                renderLabels(printArea, mode, bName, bq1, bq3, bq500, bq600, bq5k, bTxt, bQty, bqS, bsMonth, pDate, isGlobalTrim);
+                renderLabels(printArea, mode, bName, bq1, bq3, bq500, bq600, bq5k, bTxt, bQty, bqS, bsMonth, pDate, isGlobalTrim, solarDay);
             }
         }
 
-        function renderLabels(area, mode, name, q1, q3, q500, q600, q5k, cTxt, cQty, qS, m, d, isTrimmed = false) {
+        function renderLabels(area, mode, name, q1, q3, q500, q600, q5k, cTxt, cQty, qS, m, d, isTrimmed = false, solarDay = "") {
             if (mode === 'spec') {
-                for (let i = 0; i < q1; i++) area.innerHTML += createSpec(name, "1K", isTrimmed);
-                for (let i = 0; i < q3; i++) area.innerHTML += createSpec(name, "300g", isTrimmed);
-                for (let i = 0; i < q500; i++) area.innerHTML += createSpec(name, "500g", isTrimmed);
-                for (let i = 0; i < q600; i++) area.innerHTML += createSpec(name, "600g", isTrimmed);
-                for (let i = 0; i < q5k; i++) area.innerHTML += createSpec(name, "5KG/件", isTrimmed);
-                for (let i = 0; i < cQty; i++) area.innerHTML += createSpec(name, cTxt, isTrimmed);
-                for (let i = 0; i < qS; i++) area.innerHTML += createSpec(name, "樣品", isTrimmed);
+                for (let i = 0; i < q1; i++) area.innerHTML += createSpec(name, "1K", isTrimmed, solarDay);
+                for (let i = 0; i < q3; i++) area.innerHTML += createSpec(name, "300g", isTrimmed, solarDay);
+                for (let i = 0; i < q500; i++) area.innerHTML += createSpec(name, "500g", isTrimmed, solarDay);
+                for (let i = 0; i < q600; i++) area.innerHTML += createSpec(name, "600g", isTrimmed, solarDay);
+                for (let i = 0; i < q5k; i++) area.innerHTML += createSpec(name, "5KG/件", isTrimmed, solarDay);
+                for (let i = 0; i < cQty; i++) area.innerHTML += createSpec(name, cTxt, isTrimmed, solarDay);
+                for (let i = 0; i < qS; i++) area.innerHTML += createSpec(name, "樣品", isTrimmed, solarDay);
             } else {
                 addBoxLabels(area, name, q1, 3, "1KG", m, d);
                 addBoxLabels(area, name, q3, 10, "300G", m, d);
@@ -1582,7 +1668,7 @@
         }
 
         // 建立品規標籤 (35x25mm)
-        function createSpec(n, s, isTrimmed = false) {
+        function createSpec(n, s, isTrimmed = false, solarDay = "") {
             let displayName = n;
             // 品名分行處理
             if (n.includes("［")) {
@@ -1599,9 +1685,13 @@
 
             const nameFontSize = getFontSizeForWidth(longestLine, 120, 18);
             const specBigFontSize = getFontSizeForWidth(s, 128, 20.9);
+            const solarDayHTML = (solarDay !== "" && solarDay !== undefined && solarDay !== null)
+                ? `<div class="solar-day-badge">${solarDay}</div>`
+                : '';
             const trimMarkHTML = isTrimmed ? `<div class="trim-mark">*</div>` : '';
 
             return `<div class="label-page spec-size spec-label">
+                ${solarDayHTML}
                 <div class="name-top" style="font-size: ${nameFontSize}">${displayName}</div>
                 <div class="spec-big" style="font-size: ${specBigFontSize}"><span>${s}</span></div>
                 ${trimMarkHTML}
