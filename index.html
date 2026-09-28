@@ -600,13 +600,13 @@
 
         .spec-label .solar-day-badge {
             position: absolute;
-            top: 0.8mm;
-            right: 1.2mm;
-            font-size: 8.5pt;
+            top: 0.6mm;
+            right: 0.8mm;
+            font-size: 6.5pt;
             font-weight: 900;
             letter-spacing: -0.2px;
-            border: 1.2px solid black;
-            padding: 0.5px 2.5px;
+            border: 1px solid black;
+            padding: 0.2px 2px;
             border-radius: 2px;
             background: white;
             line-height: 1.1;
@@ -910,7 +910,7 @@
             { key: "紅火焰", name: "紅火焰生菜", special: false },
             { key: "綠火焰", name: "綠火焰生菜", special: false },
             { key: "紅蘿蔓", name: "紅蘿蔓", special: false },
-            { key: "奶油生菜", name: "波士頓奶油生菜", special: false },
+            { key: "奶油生菜", name: "奶油生菜", special: false },
             { key: "羽衣甘藍", name: "羽衣甘藍", special: false },
             { key: "巴西里［平葉］", name: "巴西里 [平葉]", special: false },
             { key: "巴西里［捲葉］", name: "巴西里 [捲葉]", special: false },
@@ -1683,9 +1683,11 @@
             const lines = displayName.split("<br>");
             const longestLine = lines.reduce((a, b) => a.length > b.length ? a : b);
 
-            const nameFontSize = getFontSizeForWidth(longestLine, 120, 18);
+            const hasSolarDay = (solarDay !== "" && solarDay !== undefined && solarDay !== null);
+            const maxNameWidth = hasSolarDay ? 102 : 118;
+            const nameFontSize = getFontSizeForWidth(longestLine, maxNameWidth, 17);
             const specBigFontSize = getFontSizeForWidth(s, 128, 20.9);
-            const solarDayHTML = (solarDay !== "" && solarDay !== undefined && solarDay !== null)
+            const solarDayHTML = hasSolarDay
                 ? `<div class="solar-day-badge">${solarDay}</div>`
                 : '';
             const trimMarkHTML = isTrimmed ? `<div class="trim-mark">*</div>` : '';
