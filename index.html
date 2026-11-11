@@ -225,7 +225,6 @@
             display: block;
             animation: fadeIn 0.2s ease-in-out;
         }
-        }
 
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(4px); }
@@ -401,6 +400,40 @@
         .th-orange { background-color: #fce5cd !important; }
         .th-green { background-color: #d9ead3 !important; }
         .th-misc { background-color: #e6b8af !important; }
+
+        /* 苔籃計算專用樣式 */
+        .basket-badge {
+            display: inline-block;
+            padding: 3px 9px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 13px;
+            line-height: 1.2;
+        }
+        .basket-badge.orange {
+            background-color: #ffe8d2;
+            color: #d35400;
+            border: 1px solid #f39c12;
+        }
+        .basket-badge.green {
+            background-color: #e2f5e5;
+            color: #1e824c;
+            border: 1px solid #27ae60;
+        }
+        .basket-calc-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13.5px;
+            background: #fff;
+        }
+        .basket-calc-table th, .basket-calc-table td {
+            border: 1px solid #dcdcdc;
+            padding: 8px 6px;
+            text-align: center;
+        }
+        .basket-calc-table tbody tr:hover {
+            background-color: #f8fafc;
+        }
 
         .item-name {
             text-align: left;
@@ -741,6 +774,9 @@
                 <button class="tab-btn active" id="tabBtn-data" onclick="switchTab('data')">
                     📋 製作數量明細表
                 </button>
+                <button class="tab-btn" id="tabBtn-basket" onclick="switchTab('basket')">
+                    🧺 苔籃計算
+                </button>
                 <button class="tab-btn" id="tabBtn-label" onclick="switchTab('label')">
                     🏷️ 標籤列印管理
                 </button>
@@ -753,6 +789,7 @@
                 <span class="stat-chip" id="statItems">總品項: 0 種</span>
                 <span class="stat-chip" id="statWeight">總重量: 0 kg</span>
                 <span class="stat-chip" id="statQty">總包數: 0 包</span>
+                <span class="stat-chip" id="statBaskets" style="background:#eaf2f8; color:#1a5276; border-color:#aed6f1;">總苔數: 0 苔</span>
             </div>
         </div>
 
@@ -803,7 +840,75 @@
         </div>
 
         <!-- ==========================================
-             頁籤 2: 🏷️ 標籤列印管理
+             頁籤 2: 🧺 苔籃計算
+             ========================================== -->
+        <div id="tabContent-basket" class="tab-content no-print">
+            <div class="card" style="padding: 16px 20px;">
+                <!-- 頂部標題與按鈕操作列 -->
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 16px;">
+                    <div>
+                        <h3 style="margin: 0; color: #2c3e50; font-size: 17px; display: flex; align-items: center; gap: 8px;">
+                            🧺 苔籃需求即時計算
+                        </h3>
+                        <p style="margin: 4px 0 0 0; font-size: 13px; color: #7f8c8d;">
+                            計算邏輯：<strong>橘苔</strong>（1KG/包，3入/苔，無條件進位）｜<strong>綠苔</strong>（300G/包，10入/苔，無條件進位）
+                        </p>
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                        <label style="font-size: 13px; color: #495057; display: flex; align-items: center; gap: 5px; cursor: pointer; user-select: none;">
+                            <input type="checkbox" id="basketOnlyActive" checked onchange="renderBasketCalculation()"> 僅顯示有製作數量的品項
+                        </label>
+                        <button class="btn-copy-img" onclick="copyBasketTableAsImage()">📸 一鍵複製圖片傳 LINE</button>
+                        <button class="btn-paste" style="background:#2980b9;" onclick="copyBasketText()">📋 一鍵複製文字傳 LINE</button>
+                    </div>
+                </div>
+
+                <!-- 產出截圖專用區塊 -->
+                <div id="basketCaptureArea" style="padding: 15px; background: #ffffff; border: 1px solid #e1e8ed; border-radius: 6px;">
+                    <!-- 標題與日期列 (截圖時呈現) -->
+                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; border-bottom: 1px solid #edf2f7; padding-bottom: 8px;">
+                        <h3 style="margin: 0; color: #2c3e50; font-size: 16px;">
+                            🧺 生菜製作苔籃需求明細表
+                        </h3>
+                        <span id="basketDateBadge" style="font-size: 13px; color: #475569; font-weight: 600;"></span>
+                    </div>
+
+                    <!-- 即時統計卡片列 -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px;">
+                        <div style="background: #fff8f0; border: 1.5px solid #f39c12; border-radius: 8px; padding: 12px 15px;">
+                            <div style="font-size: 13px; color: #d35400; font-weight: bold; margin-bottom: 4px;">🟧 總橘苔需求 (1kg)</div>
+                            <div style="display: flex; align-items: baseline; gap: 6px;">
+                                <span id="statOrangeBaskets" style="font-size: 26px; font-weight: 800; color: #e67e22;">0</span>
+                                <span style="font-size: 13px; color: #7f8c8d;">苔</span>
+                                <span id="statOrangePacks" style="font-size: 12px; color: #95a5a6; margin-left: auto;">(共 0 包 / 3入)</span>
+                            </div>
+                        </div>
+                        <div style="background: #f4faf4; border: 1.5px solid #27ae60; border-radius: 8px; padding: 12px 15px;">
+                            <div style="font-size: 13px; color: #1e824c; font-weight: bold; margin-bottom: 4px;">🟩 總綠苔需求 (300g)</div>
+                            <div style="display: flex; align-items: baseline; gap: 6px;">
+                                <span id="statGreenBaskets" style="font-size: 26px; font-weight: 800; color: #27ae60;">0</span>
+                                <span style="font-size: 13px; color: #7f8c8d;">苔</span>
+                                <span id="statGreenPacks" style="font-size: 12px; color: #95a5a6; margin-left: auto;">(共 0 包 / 10入)</span>
+                            </div>
+                        </div>
+                        <div style="background: #f8f9fa; border: 1.5px solid #34495e; border-radius: 8px; padding: 12px 15px;">
+                            <div style="font-size: 13px; color: #2c3e50; font-weight: bold; margin-bottom: 4px;">🧺 苔籃總計 (橘+綠)</div>
+                            <div style="display: flex; align-items: baseline; gap: 6px;">
+                                <span id="statTotalBaskets" style="font-size: 26px; font-weight: 800; color: #2c3e50;">0</span>
+                                <span style="font-size: 13px; color: #7f8c8d;">苔</span>
+                                <span id="statActiveItemCount" style="font-size: 12px; color: #95a5a6; margin-left: auto;">(共 0 品項)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 計算表格呈現區塊 -->
+                    <div id="basketTableContainer"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==========================================
+             頁籤 3: 🏷️ 標籤列印管理
              ========================================== -->
         <div id="tabContent-label" class="tab-content no-print">
             <div class="card" style="padding: 16px 20px;">
@@ -895,6 +1000,7 @@
         function onDateChange() {
             updateSolarDayDisplay();
             generatePreview();
+            renderBasketCalculation();
         }
 
         // 設定今日日期
@@ -985,12 +1091,14 @@
                 if (e.target.tagName === 'INPUT') {
                     if (e.target.type === 'number') updateInputStyle(e.target);
                     updateQuickStats();
+                    renderBasketCalculation();
                 }
             });
 
             updateAllInputStyles();
             updateQuickStats();
             updateSolarDayDisplay();
+            renderBasketCalculation();
         }
 
         // 展開/收合備用文字貼上輸入框
@@ -1024,6 +1132,8 @@
                 if (clickCount === 0 && countTotalQty() > 0) {
                     distribute();
                 }
+            } else if (tabId === 'basket') {
+                renderBasketCalculation();
             }
         }
 
@@ -1091,6 +1201,21 @@
             document.getElementById('statItems').innerText = `總品項: ${distinctItems} 種`;
             document.getElementById('statWeight').innerText = `總重量: ${totalWeight.toFixed(1)} kg`;
             document.getElementById('statQty').innerText = `總包數: ${totalQty} 包`;
+
+            // 計算苔籃快速總計
+            if (typeof getBasketData === 'function') {
+                const basketList = getBasketData();
+                let quickOrange = 0;
+                let quickGreen = 0;
+                basketList.forEach(b => {
+                    quickOrange += b.orangeBaskets;
+                    quickGreen += b.greenBaskets;
+                });
+                const statBasketsEl = document.getElementById('statBaskets');
+                if (statBasketsEl) {
+                    statBasketsEl.innerText = `總苔數: ${quickOrange + quickGreen} 苔 (橘${quickOrange}/綠${quickGreen})`;
+                }
+            }
         }
 
         // 品項模糊匹配器
@@ -1306,9 +1431,10 @@
 
             if (count > 0) {
                 showToast(`🎉 成功匯入 ${count} 列製作數據！`);
-                // 自動更新派工與標籤
+                // 自動更新派工、標籤與苔籃
                 distribute();
                 generatePreview();
+                renderBasketCalculation();
             } else {
                 showToast("無法辨識數據，請確認 Excel 選取範圍");
             }
@@ -1537,6 +1663,290 @@
         }
 
         // =========================================================
+        // 🧺 苔籃需求即時計算系統 (各品項獨立計算與尾數進位)
+        // =========================================================
+        function getBasketData() {
+            const list = [];
+            document.querySelectorAll('#tableBody tr').forEach(row => {
+                const pKey = row.getAttribute('data-key');
+                const productObj = products.find(p => p.key === pKey);
+                const name = productObj ? (productObj.labelName || productObj.name) : (row.querySelector('.item-name')?.innerText || "");
+                const q1k = parseInt(row.querySelector('.q1k')?.value) || 0;
+                const q300 = parseInt(row.querySelector('.q300')?.value) || 0;
+
+                // 1. 橘苔 (1KG/包，3入/苔)：製作數量 / 3，若有尾數無條件進位
+                const orangeBaskets = q1k > 0 ? Math.ceil(q1k / 3) : 0;
+
+                // 2. 綠苔 (300G/包，10入/苔)：製作數量 / 10，若有尾數無條件進位
+                const greenBaskets = q300 > 0 ? Math.ceil(q300 / 10) : 0;
+
+                list.push({
+                    name,
+                    q1k,
+                    orangeBaskets,
+                    q300,
+                    greenBaskets,
+                    totalBaskets: orangeBaskets + greenBaskets,
+                    hasData: (q1k > 0 || q300 > 0)
+                });
+            });
+
+            // 手寫自訂品項列
+            const bNameRaw = document.getElementById('blankName')?.value.trim();
+            const bq1k = parseInt(document.getElementById('blank1k')?.value) || 0;
+            const bq300 = parseInt(document.getElementById('blank300')?.value) || 0;
+            if (bNameRaw || bq1k > 0 || bq300 > 0) {
+                const bName = bNameRaw || "自訂手寫品項";
+                const orangeBaskets = bq1k > 0 ? Math.ceil(bq1k / 3) : 0;
+                const greenBaskets = bq300 > 0 ? Math.ceil(bq300 / 10) : 0;
+
+                list.push({
+                    name: bName,
+                    q1k: bq1k,
+                    orangeBaskets,
+                    q300: bq300,
+                    greenBaskets,
+                    totalBaskets: orangeBaskets + greenBaskets,
+                    hasData: (bq1k > 0 || bq300 > 0)
+                });
+            }
+
+            return list;
+        }
+
+        function renderBasketCalculation() {
+            const dataList = getBasketData();
+            const onlyActive = document.getElementById('basketOnlyActive') ? document.getElementById('basketOnlyActive').checked : true;
+            const displayList = onlyActive ? dataList.filter(item => item.hasData) : dataList;
+
+            let totalOrangePacks = 0;
+            let totalOrangeBaskets = 0;
+            let totalGreenPacks = 0;
+            let totalGreenBaskets = 0;
+            let activeItemCount = 0;
+
+            dataList.forEach(item => {
+                if (item.hasData) activeItemCount++;
+                totalOrangePacks += item.q1k;
+                totalOrangeBaskets += item.orangeBaskets;
+                totalGreenPacks += item.q300;
+                totalGreenBaskets += item.greenBaskets;
+            });
+
+            const grandTotalBaskets = totalOrangeBaskets + totalGreenBaskets;
+
+            // 更新頂部卡片
+            const elOrangeBaskets = document.getElementById('statOrangeBaskets');
+            const elOrangePacks = document.getElementById('statOrangePacks');
+            const elGreenBaskets = document.getElementById('statGreenBaskets');
+            const elGreenPacks = document.getElementById('statGreenPacks');
+            const elTotalBaskets = document.getElementById('statTotalBaskets');
+            const elActiveItemCount = document.getElementById('statActiveItemCount');
+
+            if (elOrangeBaskets) elOrangeBaskets.innerText = totalOrangeBaskets;
+            if (elOrangePacks) elOrangePacks.innerText = `(共 ${totalOrangePacks} 包 / 3入)`;
+            if (elGreenBaskets) elGreenBaskets.innerText = totalGreenBaskets;
+            if (elGreenPacks) elGreenPacks.innerText = `(共 ${totalGreenPacks} 包 / 10入)`;
+            if (elTotalBaskets) elTotalBaskets.innerText = grandTotalBaskets;
+            if (elActiveItemCount) elActiveItemCount.innerText = `(共 ${activeItemCount} 品項)`;
+
+            // 更新截圖標題上的日期
+            const packDate = document.getElementById('packDate')?.value || new Date().toISOString().slice(0, 10);
+            const solarDay = getSolarDayCode(packDate);
+            const dateBadge = document.getElementById('basketDateBadge');
+            if (dateBadge) {
+                dateBadge.innerText = `📅 製作日期：${packDate} (${solarDay})`;
+            }
+
+            const container = document.getElementById('basketTableContainer');
+            if (!container) return;
+
+            if (displayList.length === 0) {
+                container.innerHTML = `
+                    <div style="color: #7f8c8d; text-align: center; padding: 40px 20px; background: #fafbfc; border-radius: 8px; border: 1px dashed #cbd5e1;">
+                        <div style="font-size: 32px; margin-bottom: 8px;">🧺</div>
+                        <div style="font-size: 15px; font-weight: 600; color: #475569;">目前尚無製作數量資料</div>
+                        <div style="font-size: 13px; color: #94a3b8; margin-top: 4px;">請在「📋 製作數量明細表」輸入數量（橘苔 1kg 或綠苔 300g），系統將即時分項計算所需苔籃數！</div>
+                    </div>
+                `;
+                return;
+            }
+
+            let rowsHTML = '';
+            displayList.forEach((item, index) => {
+                const orangePacksDisplay = item.q1k > 0 ? `<strong>${item.q1k}</strong>` : `<span style="color:#bdc3c7;">0</span>`;
+                const orangeBadgeDisplay = item.q1k > 0 
+                    ? `<span class="basket-badge orange">${item.orangeBaskets} 苔</span>` 
+                    : `<span style="color:#bdc3c7;">-</span>`;
+
+                const greenPacksDisplay = item.q300 > 0 ? `<strong>${item.q300}</strong>` : `<span style="color:#bdc3c7;">0</span>`;
+                const greenBadgeDisplay = item.q300 > 0 
+                    ? `<span class="basket-badge green">${item.greenBaskets} 苔</span>` 
+                    : `<span style="color:#bdc3c7;">-</span>`;
+
+                const itemTotalDisplay = item.totalBaskets > 0 
+                    ? `<strong style="font-size: 15px; color: #2c3e50;">${item.totalBaskets}</strong> <span style="font-size: 12px; color: #7f8c8d;">苔</span>`
+                    : `<span style="color:#bdc3c7;">0 苔</span>`;
+
+                rowsHTML += `
+                    <tr>
+                        <td style="color: #7f8c8d; font-size: 12px;">${index + 1}</td>
+                        <td class="item-name" style="font-weight: 700; color: #2c3e50;">${item.name}</td>
+                        <td>${orangePacksDisplay}</td>
+                        <td>${orangeBadgeDisplay}</td>
+                        <td>${greenPacksDisplay}</td>
+                        <td>${greenBadgeDisplay}</td>
+                        <td style="background-color: #f8f9fa;">${itemTotalDisplay}</td>
+                    </tr>
+                `;
+            });
+
+            const tableHTML = `
+                <div style="overflow-x: auto;">
+                    <table class="result-table basket-calc-table">
+                        <thead>
+                            <tr>
+                                <th rowspan="2" style="width: 5%;">#</th>
+                                <th rowspan="2" style="width: 27%; text-align: left; padding-left: 12px;">製作品項</th>
+                                <th colspan="2" class="th-orange" style="background-color: #fce5cd; color: #b45f06; font-size: 14px;">
+                                    🟧 橘苔（1KG/包 · 3入/苔）
+                                </th>
+                                <th colspan="2" class="th-green" style="background-color: #d9ead3; color: #274e13; font-size: 14px;">
+                                    🟩 綠苔（300G/包 · 10入/苔）
+                                </th>
+                                <th rowspan="2" style="width: 16%; background-color: #e9ecef; color: #2c3e50; font-size: 13.5px;">品項苔數小計</th>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #fef0e1; width: 13%;">製作包數</th>
+                                <th style="background-color: #fce5cd; width: 13%; color: #b45f06;">橘苔數</th>
+                                <th style="background-color: #eaf5e7; width: 13%;">製作包數</th>
+                                <th style="background-color: #d9ead3; width: 13%; color: #274e13;">綠苔數</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rowsHTML}
+                        </tbody>
+                        <tfoot>
+                            <tr style="background-color: #f1f4f8; font-weight: bold; font-size: 14px;">
+                                <td colspan="2" style="text-align: right; padding-right: 14px;">總計需求：</td>
+                                <td style="color: #b45f06;">${totalOrangePacks} 包</td>
+                                <td style="background-color: #fce5cd; color: #b45f06; font-size: 16px;">
+                                    <span class="basket-badge orange" style="font-size: 14px;">${totalOrangeBaskets} 苔</span>
+                                </td>
+                                <td style="color: #274e13;">${totalGreenPacks} 包</td>
+                                <td style="background-color: #d9ead3; color: #274e13; font-size: 16px;">
+                                    <span class="basket-badge green" style="font-size: 14px;">${totalGreenBaskets} 苔</span>
+                                </td>
+                                <td style="background-color: #e2e8f0; color: #1e293b; font-size: 16px;">
+                                    <strong style="color: #0f172a;">${grandTotalBaskets} 苔</strong>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            `;
+
+            container.innerHTML = tableHTML;
+        }
+
+        // 複製苔籃計算截圖傳 LINE
+        async function copyBasketTableAsImage() {
+            const captureEl = document.getElementById("basketCaptureArea");
+            if (!captureEl || captureEl.querySelector(".basket-calc-table") === null) {
+                showToast("請先在明細表輸入數量產生苔籃表格後再複製圖片！");
+                return;
+            }
+
+            try {
+                const canvas = await html2canvas(captureEl, { scale: 2, backgroundColor: "#ffffff" });
+                canvas.toBlob(async (blob) => {
+                    try {
+                        const item = new ClipboardItem({ "image/png": blob });
+                        await navigator.clipboard.write([item]);
+                        alert("📸 苔籃計算表格圖片已成功複製！\n請直接開啟 LINE 對話框按 Ctrl+V 貼上發送。");
+                    } catch (e) {
+                        const link = document.createElement("a");
+                        link.download = `苔籃計算表_${new Date().toISOString().slice(0, 10)}.png`;
+                        link.href = canvas.toDataURL();
+                        link.click();
+                        alert("已為您下載苔籃計算表圖片，可直接將圖片拖曳至 LINE 發送！");
+                    }
+                });
+            } catch (err) {
+                alert("截圖失敗，請稍後再試。");
+            }
+        }
+
+        // 複製苔籃計算文字傳 LINE
+        function copyBasketText() {
+            const list = getBasketData().filter(item => item.hasData);
+            if (list.length === 0) {
+                showToast("尚無製作數量，無法複製文字！");
+                return;
+            }
+
+            const packDate = document.getElementById('packDate')?.value || new Date().toISOString().slice(0, 10);
+            const solarDay = getSolarDayCode(packDate);
+            let totalOrange = 0;
+            let totalOrangePacks = 0;
+            let totalGreen = 0;
+            let totalGreenPacks = 0;
+
+            list.forEach(i => {
+                totalOrange += i.orangeBaskets;
+                totalOrangePacks += i.q1k;
+                totalGreen += i.greenBaskets;
+                totalGreenPacks += i.q300;
+            });
+            const grandTotalBaskets = totalOrange + totalGreen;
+
+            let text = `🧺 【生菜製作苔籃需求統計】\n`;
+            text += `📅 製作日期：${packDate} (${solarDay})\n`;
+            text += `---------------------------------\n`;
+            text += `📊 【苔籃總計需求】\n`;
+            text += `🟧 橘苔 (1kg/包 · 3入/苔)：共 ${totalOrange} 苔 (共 ${totalOrangePacks} 包)\n`;
+            text += `🟩 綠苔 (300g/包 · 10入/苔)：共 ${totalGreen} 苔 (共 ${totalGreenPacks} 包)\n`;
+            text += `🧺 苔籃總計：共 ${grandTotalBaskets} 苔 (涵蓋 ${list.length} 個品項)\n`;
+            text += `---------------------------------\n`;
+            text += `📋 【各品項分開明細】\n`;
+
+            list.forEach((item, idx) => {
+                text += `${idx + 1}. 【${item.name}】\n`;
+                if (item.q1k > 0) {
+                    text += `   • 🟧 橘苔(1kg)：${item.q1k} 包 ➔ ${item.orangeBaskets} 苔\n`;
+                } else {
+                    text += `   • 🟧 橘苔(1kg)：0 包 (0 苔)\n`;
+                }
+                if (item.q300 > 0) {
+                    text += `   • 🟩 綠苔(300g)：${item.q300} 包 ➔ ${item.greenBaskets} 苔\n`;
+                } else {
+                    text += `   • 🟩 綠苔(300g)：0 包 (0 苔)\n`;
+                }
+                text += `   ↳ 該品項合計：${item.totalBaskets} 苔 (橘 ${item.orangeBaskets} + 綠 ${item.greenBaskets})\n\n`;
+            });
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert("📋 苔籃計算明細文字已複製成功！\n可直接至 LINE 貼上發送。");
+                }).catch(() => {
+                    fallbackCopy(text);
+                });
+            } else {
+                fallbackCopy(text);
+            }
+
+            function fallbackCopy(str) {
+                const ta = document.createElement("textarea");
+                ta.value = str;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                alert("📋 苔籃計算明細文字已複製！");
+            }
+        }
+
+        // =========================================================
         // 🏷️ 標籤管理與列印系統 (保留 100% 原有格式)
         // =========================================================
         function applyBatchMonth() {
@@ -1720,6 +2130,7 @@
             clickCount = 0;
             updateAllInputStyles();
             updateQuickStats();
+            renderBasketCalculation();
             showToast("已清空所有資料！");
         }
 
